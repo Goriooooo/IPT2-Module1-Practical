@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 // Subject functionality
 document.addEventListener('DOMContentLoaded', () => {
     // Student section (keep existing)
@@ -67,7 +67,7 @@ function displaySubjects() {
         </tr>
     `).join('');
 }
-=======
+
 // Initialize event listener when document is loaded
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('addStudentButton').addEventListener('click', addStudent);
@@ -132,4 +132,3 @@ function displayStudents() {
         </tr>
     `).join('');
 }
->>>>>>> 269066d26a9ba99d5304a306e903b32dde7aa02d

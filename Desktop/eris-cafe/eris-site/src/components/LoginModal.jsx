@@ -1,30 +1,53 @@
-import React, { useState } from 'react';
-import { useGoogleLogin } from '@react-oauth/google'; 
+import React, { useState, useRef } from 'react';
+import { useGoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
 import { X } from 'lucide-react';
-import { FcGoogle } from 'react-icons/fc'; // <-- We now import the icon
+import { FcGoogle } from 'react-icons/fc';
+import ReCAPTCHA from 'react-google-recaptcha'; // Import ReCAPTCHA
 
 const LoginModal = ({ isOpen, onClose }) => {
   const { login: authLogin } = useAuth();
   const [error, setError] = useState('');
+  const [recaptchaToken, setRecaptchaToken] = useState(null); // State for the token
+  const recaptchaRef = useRef();
 
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       const accessToken = tokenResponse.access_token;
-      const result = await authLogin({ credential: accessToken }); 
-      
+
+      // Send both tokens to the backend
+      const result = await authLogin({ 
+        credential: accessToken,
+        recaptchaToken: recaptchaToken 
+      });
+
       if (result.success) {
         onClose();
       } else {
-        setError('Login failed. Backend rejected the token.');
+        setError(result.message || 'Login failed. Backend rejected the token.');
+        // Reset reCAPTCHA on failure so the user can try again
+        setRecaptchaToken(null);
+        recaptchaRef.current.reset();
       }
     },
     onError: () => {
       console.log('Login Failed');
       setError('Login failed. Please try again.');
     },
-    flow: 'implicit', 
+    flow: 'implicit',
   });
+
+  // This function is called when the user clicks the Google button
+  const onLoginClick = () => {
+    // Check if reCAPTCHA is completed first
+    if (!recaptchaToken) {
+      setError('Please complete the "I\'m not a robot" check.');
+      return;
+    }
+    // If it's complete, clear any errors and start the Google login flow
+    setError('');
+    handleGoogleLogin();
+  };
 
   if (!isOpen) return null;
 
@@ -53,13 +76,22 @@ const LoginModal = ({ isOpen, onClose }) => {
           </div>
         )}
 
+        {/* reCAPTCHA Checkbox */}
+        <div className="flex justify-center mb-4">
+          <ReCAPTCHA
+            ref={recaptchaRef}
+            sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+            onChange={(token) => setRecaptchaToken(token)} // Save the token
+            onExpired={() => setRecaptchaToken(null)} // Clear token if it expires
+          />
+        </div>
+
         {/* Custom Google Sign In Button */}
         <div className="flex justify-center">
           <button
-            onClick={() => handleGoogleLogin()} // This calls the hook
+            onClick={onLoginClick} // Use our new click handler
             className="flex items-center justify-center w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-700 font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
           >
-            {/* THIS IS THE NEW, FIXED ICON */}
             <FcGoogle className="w-5 h-5 mr-3" />
             Continue with Google
           </button>

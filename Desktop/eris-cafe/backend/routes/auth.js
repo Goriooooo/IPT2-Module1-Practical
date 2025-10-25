@@ -1,175 +1,62 @@
 import express from 'express';
+import { OAuth2Client } from 'google-auth-library';
+import jwt from 'jsonwebtoken';
+import User from '../models/User.js'; // This should now be correct
+import axios from 'axios';
+
 const router = express.Router();
 
-// Temporary in-memory storage (replace with MongoDB in production)
-let users = [];
-let orders = [];
-let reservations = [];
+// This client is still needed
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-// Google OAuth authentication endpoint
+// Google Auth
 router.post('/google', async (req, res) => {
+  const { token } = req.body; // This is the ACCESS TOKEN
+
   try {
-    const { credential, user } = req.body;
-    
-    // Find or create user
-    let existingUser = users.find(u => u.id === user.sub);
-    
-    if (!existingUser) {
-      existingUser = {
-        id: user.sub,
+    // 1. Use the Access Token to get user info from Google
+    const googleResponse = await axios.get(
+      'https://www.googleapis.com/oauth2/v3/userinfo',
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    const { sub, email, name, picture } = googleResponse.data;
+
+    // 2. Check if user already exists
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      // 3. If user doesn't exist, create a new one
+      user = new User({
+        googleId: sub,
+        name: name, // <-- FIX #1: Was 'username: name'
+        email,
+        profilePicture: picture,
+      });
+      await user.save();
+    }
+
+    // 4. Create your own application JWT (appToken)
+    const appToken = jwt.sign(
+      {
+        id: user._id,
+        name: user.name, 
         email: user.email,
-        name: user.name,
-        picture: user.picture,
-        createdAt: new Date(),
-        orders: [],
-        reservations: []
-      };
-      users.push(existingUser);
-      console.log('New user created:', existingUser.email);
-    } else {
-      console.log('Existing user logged in:', existingUser.email);
-    }
-    
-    res.json({
-      success: true,
-      user: existingUser
-    });
+        profilePicture: user.profilePicture,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' } // Token expires in 1 hour
+    );
+
+    // 5. Send the appToken back to the frontend
+    res.status(200).json({ appToken });
+
   } catch (error) {
-    console.error('Auth error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Authentication failed',
-      error: error.message
-    });
+    console.error('Authentication error:', error.message);
+    res.status(401).json({ message: 'Invalid token or authentication failed' });
   }
-});
-
-// Create order
-router.post('/orders', async (req, res) => {
-  try {
-    const { userId, items, totalPrice, customerInfo } = req.body;
-    
-    const order = {
-      id: `ORD-${Date.now()}`,
-      userId,
-      items,
-      totalPrice,
-      customerInfo,
-      status: 'pending',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    
-    orders.push(order);
-    
-    // Update user's orders
-    const user = users.find(u => u.id === userId);
-    if (user) {
-      user.orders.push(order.id);
-    }
-    
-    console.log('Order created:', order.id);
-    res.json({ success: true, order });
-  } catch (error) {
-    console.error('Order creation error:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-// Get user orders
-router.get('/orders/:userId', async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const userOrders = orders.filter(order => order.userId === userId);
-    
-    res.json({ success: true, orders: userOrders });
-  } catch (error) {
-    console.error('Get orders error:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-// Create reservation
-router.post('/reservations', async (req, res) => {
-  try {
-    const { userId, tableId, customerInfo, date, time, guests } = req.body;
-    
-    const reservation = {
-      id: `RES-${Date.now()}`,
-      userId,
-      tableId,
-      customerInfo,
-      date,
-      time,
-      guests,
-      status: 'confirmed',
-      createdAt: new Date()
-    };
-    
-    reservations.push(reservation);
-    
-    // Update user's reservations
-    const user = users.find(u => u.id === userId);
-    if (user) {
-      user.reservations.push(reservation.id);
-    }
-    
-    console.log('Reservation created:', reservation.id);
-    res.json({ success: true, reservation });
-  } catch (error) {
-    console.error('Reservation creation error:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-// Get user reservations
-router.get('/reservations/:userId', async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const userReservations = reservations.filter(res => res.userId === userId);
-    
-    res.json({ success: true, reservations: userReservations });
-  } catch (error) {
-    console.error('Get reservations error:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-// Cancel reservation
-router.delete('/reservations/:reservationId', async (req, res) => {
-  try {
-    const { reservationId } = req.params;
-    const reservation = reservations.find(r => r.id === reservationId);
-    
-    if (reservation) {
-      reservation.status = 'cancelled';
-      reservation.cancelledAt = new Date();
-      
-      console.log('Reservation cancelled:', reservationId);
-      res.json({ success: true, message: 'Reservation cancelled successfully' });
-    } else {
-      res.status(404).json({ success: false, message: 'Reservation not found' });
-    }
-  } catch (error) {
-    console.error('Cancel reservation error:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-// Logout endpoint
-router.post('/logout', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Logged out successfully'
-  });
-});
-
-// Get current user endpoint
-router.get('/me', (req, res) => {
-  res.json({
-    success: true,
-    user: null
-  });
 });
 
 export default router;

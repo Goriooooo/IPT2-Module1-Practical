@@ -1,44 +1,32 @@
 import express from 'express';
-import cors from 'cors';
+import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import authRoutes from './routes/auth.js';
+import cors from 'cors';
+import authRoutes from './routes/auth.js'; // Use the new auth route
 
-dotenv.config();
+dotenv.config(); // Make sure it finds the .env file
 
 const app = express();
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+// --- Middleware ---
+app.use(cors()); // Allows your frontend to make requests
+app.use(express.json()); // Allows the server to read JSON
 
-app.get('/', (req, res) => {
-    res.send('Hello World from Eris Cafe Backend!');
-});
+// --- Routes ---
+app.use('/api/auth', authRoutes); // Connects /api/auth to your new auth.js
 
-// Auth routes (includes orders and reservations)
-app.use('/api/auth', authRoutes);
+// --- Database Connection ---
+const PORT = process.env.PORT || 4000;
+const MONGO_URI = process.env.MONGO_URI;
 
-// Optional: MongoDB connection (commented out for now)
-// import { connectDB } from './config/db.js';     
-// import Product from './models/product.model.js';
-// 
-// app.post("/api/products", async (req, res) => {
-//     const product = req.body;
-//     if (!product.name || !product.price || !product.description) {
-//         return res.status(400).json({ message: "Product data is required" });
-//     }
-//     const newProduct = new Product(product);
-//     try {
-//         await newProduct.save();
-//         res.status(201).json({ success: true, data: newProduct });
-//     } catch (error) {
-//         console.error("Error saving product:", error);
-//         res.status(500).json({ success: false, message: "Server Error" });
-//     }
-// });
-
-app.listen(3000, () => {
-    // connectDB(); // Commented out - using in-memory storage for now
-    console.log('Server is running on localhost:3000');  
-    console.log('Using in-memory storage for orders and reservations');
+mongoose.connect(MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => {
+    console.log('✅ Successfully connected to MongoDB!');
+    app.listen(PORT, () => console.log(`✅ Backend server running on port: ${PORT}`));
+})
+.catch((error) => {
+    console.error('❌ MongoDB connection error:', error.message);
 });

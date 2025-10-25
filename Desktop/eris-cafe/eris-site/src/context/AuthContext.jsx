@@ -1,14 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import { jwtDecode } from 'jwt-decode'; // You need to install this
 
 const AuthContext = createContext();
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+  return useContext(AuthContext);
 };
 
 export const AuthProvider = ({ children }) => {
@@ -16,51 +13,55 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is already logged in (from localStorage)
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    // On page load, check for our appToken
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      try {
+        // Decode our appToken to get the user data
+        const decodedUser = jwtDecode(token);
+        setUser(decodedUser);
+      } catch (error) {
+        console.error("Invalid auth token:", error);
+        localStorage.removeItem('authToken'); // Clear invalid token
+      }
     }
     setLoading(false);
   }, []);
 
-  const login = async (credential) => {
+  const login = async (credentialResponse) => {
     try {
-      // Decode the JWT token to get user info
-      const decoded = JSON.parse(atob(credential.split('.')[1]));
-      
-      const userData = {
-        name: decoded.name,
-        email: decoded.email,
-        picture: decoded.picture,
-        sub: decoded.sub // Google user ID
-      };
+      // 1. Send Google's token to our backend for verification
+      const res = await axios.post(
+        'http://localhost:4000/api/auth/google',
+        {
+          token: credentialResponse.credential, // This is the fix
+        }
+      );
 
-      // Optional: Send to your backend for verification and database storage
-      try {
-        await axios.post('http://localhost:3000/api/auth/google', {
-          credential,
-          user: userData
-        });
-      } catch (error) {
-        console.log('Backend authentication pending:', error.message);
-      }
+      // 2. Get our *own* appToken back from the backend
+      const { appToken } = res.data;
 
-      // Store user in state and localStorage
-      setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
-      
-      return { success: true, user: userData };
+      // 3. Store our appToken in localStorage
+      localStorage.setItem('authToken', appToken);
+
+      // 4. Decode our appToken to set the user state
+      const decodedUser = jwtDecode(appToken);
+      setUser(decodedUser);
+
+      return { success: true, user: decodedUser };
     } catch (error) {
       console.error('Login error:', error);
+      // Log the full backend error message
+      if (error.response) {
+        console.error("Backend Error:", error.response.data.message);
+      }
       return { success: false, error: error.message };
     }
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('user');
-    // Clear any other auth-related data
+    localStorage.removeItem('authToken');
   };
 
   const value = {
@@ -68,7 +69,7 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     loading,
-    isAuthenticated: !!user
+    isAuthenticated: !!user,
   };
 
   return (

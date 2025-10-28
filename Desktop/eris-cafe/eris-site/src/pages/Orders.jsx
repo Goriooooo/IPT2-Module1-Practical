@@ -1,27 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Navigation from '../components/Navigation';
+import EditAccountModal from '../components/EditAccountModal';
 import axios from 'axios';
 
 const Orders = () => {
   const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('orders');
+  const [showEditModal, setShowEditModal] = useState(false);
 
   const fetchOrdersAndReservations = async () => {
     try {
       setLoading(true);
+      const token = localStorage.getItem('appToken');
+      
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      };
       
       // Fetch orders
-      const ordersResponse = await axios.get(`http://localhost:3000/api/auth/orders/${user.sub}`);
-      setOrders(ordersResponse.data.orders || []);
+      const ordersResponse = await axios.get('http://localhost:4000/api/orders/my-orders', config);
+      setOrders(ordersResponse.data.data || []);
       
       // Fetch reservations
-      const reservationsResponse = await axios.get(`http://localhost:3000/api/auth/reservations/${user.sub}`);
-      setReservations(reservationsResponse.data.reservations || []);
+      const reservationsResponse = await axios.get('http://localhost:4000/api/reservations/my-reservations', config);
+      setReservations(reservationsResponse.data.data || []);
       
       setLoading(false);
     } catch (error) {
@@ -36,20 +51,53 @@ const Orders = () => {
     } else {
       setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, user]);
 
   const handleCancelReservation = async (reservationId) => {
     if (window.confirm('Are you sure you want to cancel this reservation?')) {
       try {
-        await axios.delete(`http://localhost:3000/api/auth/reservations/${reservationId}`);
+        const token = localStorage.getItem('appToken');
+        await axios.delete(`http://localhost:4000/api/reservations/${reservationId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        alert('Reservation cancelled successfully');
         // Refresh reservations
         fetchOrdersAndReservations();
       } catch (error) {
         console.error('Error cancelling reservation:', error);
-        alert('Failed to cancel reservation');
+        alert(error.response?.data?.message || 'Failed to cancel reservation');
       }
     }
+  };
+
+  const handleRequestCancelOrder = async (orderId) => {
+    if (window.confirm('Are you sure you want to request cancellation for this order? An admin will review your request.')) {
+      try {
+        const token = localStorage.getItem('appToken');
+        await axios.post(`http://localhost:4000/api/orders/${orderId}/cancel-request`, {}, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        alert('Cancellation request sent successfully. An admin will review your request.');
+        fetchOrdersAndReservations();
+      } catch (error) {
+        console.error('Error requesting cancellation:', error);
+        alert(error.response?.data?.message || 'Failed to send cancellation request');
+      }
+    }
+  };
+
+  const handleOrderClick = (order) => {
+    navigate('/status', {
+      state: {
+        orderId: order.orderId,
+        status: order.status,
+        orderData: order
+      }
+    });
   };
 
   if (!isAuthenticated) {
@@ -87,7 +135,18 @@ const Orders = () => {
       <Navigation />
       
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-24">
-        <h1 className="text-4xl font-playfair text-center mb-8">My Account</h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-4xl font-playfair">My Account</h1>
+          <button
+            onClick={() => setShowEditModal(true)}
+            className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-semibold rounded-lg hover:from-amber-600 hover:to-orange-700 transition-all shadow-md flex items-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Edit Account
+          </button>
+        </div>
         
         {/* Tabs */}
         <div className="flex justify-center space-x-4 mb-8">
@@ -136,40 +195,85 @@ const Orders = () => {
                   </div>
                 ) : (
                   orders.map((order) => (
-                    <div key={order.id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h3 className="text-xl font-semibold">Order #{order.id}</h3>
-                          <p className="text-gray-600 text-sm">
-                            {new Date(order.createdAt).toLocaleDateString('en-US', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </p>
-                        </div>
-                        <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(order.status)}`}>
-                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                        </span>
-                      </div>
-                      
-                      <div className="border-t pt-4">
-                        <h4 className="font-semibold mb-2">Items:</h4>
-                        {order.items.map((item, index) => (
-                          <div key={index} className="flex justify-between py-2">
-                            <span>{item.name} x {item.quantity}</span>
-                            <span className="font-semibold">
-                              ${(parseFloat(item.price.replace('$', '')) * item.quantity).toFixed(2)}
-                            </span>
+                    <div key={order._id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                      {/* Clickable order details */}
+                      <div 
+                        onClick={() => handleOrderClick(order)}
+                        className="p-6 cursor-pointer hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="flex justify-between items-start mb-4">
+                          <div>
+                            <h3 className="text-xl font-semibold">Order #{order.orderId}</h3>
+                            <p className="text-gray-600 text-sm">
+                              {new Date(order.createdAt).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </p>
                           </div>
-                        ))}
-                        <div className="border-t mt-2 pt-2 flex justify-between font-bold text-lg">
-                          <span>Total:</span>
-                          <span className="text-amber-600">{order.totalPrice}</span>
+                          <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(order.status)}`}>
+                            {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                          </span>
+                        </div>
+                        
+                        <div className="border-t pt-4">
+                          <h4 className="font-semibold mb-2">Items:</h4>
+                          {order.items.map((item, index) => (
+                            <div key={index} className="flex justify-between py-2">
+                              <span>{item.name} x {item.quantity}</span>
+                              <span className="font-semibold">
+                                ${(item.price * item.quantity).toFixed(2)}
+                              </span>
+                            </div>
+                          ))}
+                          <div className="border-t mt-2 pt-2 flex justify-between font-bold text-lg">
+                            <span>Total:</span>
+                            <span className="text-amber-600">${(order.totalPrice || order.totalAmount || 0).toFixed(2)}</span>
+                          </div>
+                        </div>
+
+                        <div className="mt-4 text-sm text-gray-500 flex items-center gap-2">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                          Click to view order status
                         </div>
                       </div>
+
+                      {/* Cancel request button - only show for pending/confirmed orders */}
+                      {(order.status === 'pending' || order.status === 'confirmed') && !order.cancelRequested && (
+                        <div className="border-t px-6 py-4 bg-gray-50">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation(); // Prevent triggering the order click
+                              handleRequestCancelOrder(order._id);
+                            }}
+                            className="w-full px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Request Cancellation
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Show if cancellation already requested */}
+                      {order.cancelRequested && (
+                        <div className="border-t px-6 py-4 bg-yellow-50">
+                          <div className="flex items-center gap-2 text-yellow-800">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span className="font-semibold">Cancellation Requested</span>
+                          </div>
+                          <p className="text-sm text-yellow-700 mt-1">Your cancellation request is being reviewed by an admin.</p>
+                        </div>
+                      )}
                     </div>
                   ))
                 )}
@@ -192,11 +296,18 @@ const Orders = () => {
                   </div>
                 ) : (
                   reservations.map((reservation) => (
-                    <div key={reservation.id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                    <div key={reservation._id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
                       <div className="flex justify-between items-start mb-4">
                         <div>
-                          <h3 className="text-xl font-semibold">Reservation #{reservation.id}</h3>
-                          <p className="text-gray-600 text-sm">Table {reservation.tableId}</p>
+                          <h3 className="text-xl font-semibold">Reservation #{reservation.reservationId}</h3>
+                          <p className="text-gray-600 text-sm">
+                            {new Date(reservation.date).toLocaleDateString('en-US', {
+                              weekday: 'long',
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            })}
+                          </p>
                         </div>
                         <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(reservation.status)}`}>
                           {reservation.status.charAt(0).toUpperCase() + reservation.status.slice(1)}
@@ -205,27 +316,34 @@ const Orders = () => {
                       
                       <div className="grid grid-cols-2 gap-4 mb-4">
                         <div>
-                          <p className="text-sm text-gray-600">Date</p>
-                          <p className="font-semibold">{reservation.date}</p>
-                        </div>
-                        <div>
                           <p className="text-sm text-gray-600">Time</p>
                           <p className="font-semibold">{reservation.time}</p>
                         </div>
                         <div>
                           <p className="text-sm text-gray-600">Guests</p>
-                          <p className="font-semibold">{reservation.guests} {reservation.guests === '1' ? 'Guest' : 'Guests'}</p>
+                          <p className="font-semibold">{reservation.guests} {reservation.guests === 1 ? 'Guest' : 'Guests'}</p>
                         </div>
                         <div>
                           <p className="text-sm text-gray-600">Name</p>
                           <p className="font-semibold">{reservation.customerInfo.name}</p>
                         </div>
+                        <div>
+                          <p className="text-sm text-gray-600">Phone</p>
+                          <p className="font-semibold">{reservation.customerInfo.phone}</p>
+                        </div>
                       </div>
 
-                      {reservation.status !== 'cancelled' && (
+                      {reservation.specialRequests && (
+                        <div className="mb-4">
+                          <p className="text-sm text-gray-600 mb-1">Special Requests:</p>
+                          <p className="text-sm italic">{reservation.specialRequests}</p>
+                        </div>
+                      )}
+
+                      {reservation.status === 'confirmed' && (
                         <div className="border-t pt-4">
                           <button
-                            onClick={() => handleCancelReservation(reservation.id)}
+                            onClick={() => handleCancelReservation(reservation._id)}
                             className="w-full px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors"
                           >
                             Cancel Reservation
@@ -240,6 +358,16 @@ const Orders = () => {
           </>
         )}
       </div>
+
+      {/* Edit Account Modal */}
+      <EditAccountModal 
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        onUpdate={() => {
+          // Refresh page data after profile update
+          window.location.reload();
+        }}
+      />
     </div>
   );
 };

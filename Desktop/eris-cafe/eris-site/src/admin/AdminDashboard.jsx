@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { 
   LayoutDashboard, 
   ShoppingBag, 
   Users, 
   FileText, 
+  Calendar,
   Settings, 
   LogOut,
   Menu,
@@ -14,16 +16,26 @@ import {
 const AdminDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout, userData } = useAuth();
 
   const menuItems = [ 
     { path: '/admin', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/admin/products', label: 'Products', icon: ShoppingBag },
     { path: '/admin/orders', label: 'Orders', icon: FileText },
+    { path: '/admin/reservations', label: 'Reservations', icon: Calendar },
     { path: '/admin/pos', label: 'Customers', icon: Users },
     { path: '/admin/settings', label: 'Settings', icon: Settings },
   ];
 
   const isActive = (path) => location.pathname === path;
+
+  const handleLogout = () => {
+    if (window.confirm('Are you sure you want to logout?')) {
+      logout();
+      navigate('/');
+    }
+  };
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -67,7 +79,10 @@ const AdminDashboard = () => {
         </nav>
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700">
-          <button className="flex items-center space-x-3 px-4 py-3 w-full text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors duration-200">
+          <button 
+            onClick={handleLogout}
+            className="flex items-center space-x-3 px-4 py-3 w-full text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors duration-200"
+          >
             <LogOut size={20} />
             <span>Logout</span>
           </button>
@@ -92,11 +107,11 @@ const AdminDashboard = () => {
             </div>
             <div className="flex items-center space-x-4">
               <div className="text-right">
-                <p className="text-sm font-medium text-gray-800">Admin User</p>
-                <p className="text-xs text-gray-500">admin@eriscafe.com</p>
+                <p className="text-sm font-medium text-gray-800">{userData?.name || 'Admin User'}</p>
+                <p className="text-xs text-gray-500">{userData?.email || 'admin@eriscafe.com'}</p>
               </div>
-              <div className="w-10 h-10 rounded-full bg-coffee text-white flex items-center justify-center">
-                A
+              <div className="w-10 h-10 rounded-full bg-coffee text-white flex items-center justify-center font-semibold">
+                {userData?.name?.charAt(0).toUpperCase() || 'A'}
               </div>
             </div>
           </div>

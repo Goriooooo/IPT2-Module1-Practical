@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link as RouterLink, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import LoginModal from '../components/LoginModal';
+import SignupModal from '../components/SignupModal';
+import ForgotPasswordModal from '../components/ForgotPasswordModal';
 import UserProfile from '../components/UserProfile';
 import eris from '../assets/ERIS CAFE.png';
 import erislogo from '../assets/ERISPNG.png';
@@ -17,6 +19,8 @@ const Home = () => {
   const { isAuthenticated } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
+  const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] = useState(false);
   const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
@@ -172,7 +176,31 @@ const Home = () => {
       {/* Login Modal */}
       <LoginModal 
         isOpen={isLoginModalOpen} 
-        onClose={() => setIsLoginModalOpen(false)} 
+        onClose={() => setIsLoginModalOpen(false)}
+        onSwitchToSignup={() => {
+          setIsLoginModalOpen(false);
+          setIsSignupModalOpen(true);
+        }}
+        onSwitchToForgotPassword={() => {
+          setIsLoginModalOpen(false);
+          setIsForgotPasswordModalOpen(true);
+        }}
+      />
+
+      {/* Signup Modal */}
+      <SignupModal 
+        isOpen={isSignupModalOpen} 
+        onClose={() => setIsSignupModalOpen(false)}
+        onSwitchToLogin={() => {
+          setIsSignupModalOpen(false);
+          setIsLoginModalOpen(true);
+        }}
+      />
+
+      {/* Forgot Password Modal */}
+      <ForgotPasswordModal 
+        isOpen={isForgotPasswordModalOpen} 
+        onClose={() => setIsForgotPasswordModalOpen(false)}
       />
 
       {/* Hero Section with Parallax */}
@@ -245,31 +273,29 @@ const Home = () => {
           {/* Food Cards Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
             {menuItems.map((item, index) => (
-              <div 
+              <RouterLink 
                 key={item.id}
-                className="group rounded-lg hover:shadow-2xl transition-all duration-500 overflow-hidden transform hover:-translate-y-2 cursor-pointer"
+                to={item.category === 'Iced Espresso' ? '/category1' : '#'}
+                className="group rounded-lg hover:shadow-2xl transition-all duration-500 overflow-hidden transform hover:-translate-y-2 cursor-pointer block"
                 style={{
                   animationDelay: `${index * 0.1}s`,
                 }}
               >
-                  <RouterLink to={'/hotespresso'}>
-                    {/* Image Section */}
-                  <div className="w-full  h-64 sm:h-auto relative overflow-hidden">
-                    <img 
-                      src={item.image} 
-                      alt={item.name}
-                      className="w-[450px] h-[450px] object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                    <div className="absolute top-4 left-4 ml-[55px] mt-[350px]">
-                      <span className="px-3 py-1  text-black text-xl font-semibold font-playfair rounded-full">
-                        {item.category}
-                      </span>
-                    </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                {/* Image Section */}
+                <div className="w-full h-64 sm:h-auto relative overflow-hidden">
+                  <img 
+                    src={item.image} 
+                    alt={item.name}
+                    className="w-[450px] h-[450px] object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  <div className="absolute top-4 left-4 ml-[55px] mt-[350px]">
+                    <span className="px-3 py-1 text-black text-xl font-semibold font-playfair rounded-full">
+                      {item.category}
+                    </span>
                   </div>
-                  </RouterLink>
-
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
+              </RouterLink>
             ))}
           </div>
             <section className='border-t-2 border-black  mt-[180px]' >
@@ -278,8 +304,8 @@ const Home = () => {
               <p className='text-center mt-5 text-3xl font-thin'>brewed with love, served with a smile.</p>
             </div>
             <div className="grid grid-cols-2 gap-16 mt-[100px]">
-              <img src={HERO} alt="" className='w-[700px] h-[450px] shadow-2xl ' />
-              <img src={HERO2} alt="" className='w-[700px] h-[450px] shadow-2xl ' />
+              <img src={HERO} alt="" className='w-[700px] h-[450px] ' />
+              <img src={HERO2} alt="" className='w-[700px] h-[450px]' />
             </div>
             </section>
           {/* Call to Action */}

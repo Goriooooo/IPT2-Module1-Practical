@@ -13,6 +13,7 @@ const api = axios.create({
 // 3. Create the AuthProvider component
 export const AuthProvider = ({ children }) => {
   const [authUser, setAuthUser] = useState(null);
+  const [userData, setUserData] = useState(null);
 
   // 4. useEffect to load token on app start
   useEffect(() => {
@@ -26,10 +27,12 @@ export const AuthProvider = ({ children }) => {
           // Token is expired, log them out
           localStorage.removeItem('appToken');
           setAuthUser(null);
+          setUserData(null);
           console.log('Token expired, user logged out.');
         } else {
           // Token is valid
           setAuthUser(token);
+          setUserData(decodedToken);
           api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         }
       } catch (error) {
@@ -37,11 +40,12 @@ export const AuthProvider = ({ children }) => {
         console.error("Invalid token found in localStorage", error);
         localStorage.removeItem('appToken');
         setAuthUser(null);
+        setUserData(null);
       }
     }
   }, []);
 
-  // 5. THIS IS THE NEW, UPDATED LOGIN FUNCTION
+  // 5. THIS IS THE NEW, UPDATED LOGIN FUNCTION FOR GOOGLE OAUTH
   const login = async (credentialResponse) => {
     // credentialResponse is now an object { credential, recaptchaToken }
     const { credential, recaptchaToken } = credentialResponse;
@@ -55,6 +59,7 @@ export const AuthProvider = ({ children }) => {
 
       // Set user and token in state and local storage
       setAuthUser(data.appToken);
+      setUserData(jwtDecode(data.appToken));
       localStorage.setItem('appToken', data.appToken);
       api.defaults.headers.common['Authorization'] = `Bearer ${data.appToken}`;
       console.log('Login successful, token stored');
@@ -68,9 +73,48 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Manual email/password login
+  const manualLogin = async (email, password) => {
+    try {
+      const { data } = await api.post('/auth/login', { email, password });
+      
+      // Set user and token in state and local storage
+      setAuthUser(data.appToken);
+      setUserData(jwtDecode(data.appToken));
+      localStorage.setItem('appToken', data.appToken);
+      api.defaults.headers.common['Authorization'] = `Bearer ${data.appToken}`;
+      console.log('Manual login successful');
+      return { success: true, user: data.user };
+    } catch (err) {
+      console.error('Manual login error:', err);
+      const message = err.response?.data?.message || 'Login failed';
+      return { success: false, message };
+    }
+  };
+
+  // Manual registration
+  const register = async (name, email, password) => {
+    try {
+      const { data } = await api.post('/auth/register', { name, email, password });
+      
+      // Automatically log in after registration
+      setAuthUser(data.appToken);
+      setUserData(jwtDecode(data.appToken));
+      localStorage.setItem('appToken', data.appToken);
+      api.defaults.headers.common['Authorization'] = `Bearer ${data.appToken}`;
+      console.log('Registration successful');
+      return { success: true, user: data.user };
+    } catch (err) {
+      console.error('Registration error:', err);
+      const message = err.response?.data?.message || 'Registration failed';
+      return { success: false, message };
+    }
+  };
+
   // 6. The logout function
   const logout = () => {
     setAuthUser(null);
+    setUserData(null);
     localStorage.removeItem('appToken');
     delete api.defaults.headers.common['Authorization'];
     console.log('Logout successful');
@@ -78,7 +122,17 @@ export const AuthProvider = ({ children }) => {
 
   // 7. Provide the context value
   return (
-    <AuthContext.Provider value={{ authUser, login, logout }}>
+    <AuthContext.Provider value={{ 
+      authUser, 
+      userData, 
+      user: userData, // Add alias for backward compatibility
+      isAuthenticated: !!authUser, // Add isAuthenticated helper
+      isAdmin: userData?.role === 'admin', // Add isAdmin helper
+      login, 
+      manualLogin,
+      register,
+      logout 
+    }}>
       {children}
     </AuthContext.Provider>
   );

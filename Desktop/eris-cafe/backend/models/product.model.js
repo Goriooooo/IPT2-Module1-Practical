@@ -13,6 +13,23 @@ const productSchema = mongoose.Schema({
         type: String, 
         required: true
     },
+    category: {
+        type: String,
+        required: true,
+        default: 'Uncategorized'
+    },
+    image: {
+        type: String,
+        default: ''
+    },
+    stock: {
+        type: Number,
+        default: 0
+    },
+    isAvailable: {
+        type: Boolean,
+        default: true
+    }
 }, {
     timestamps: true
 });

@@ -1,32 +1,51 @@
-import express from 'express';
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-import cors from 'cors';
-import authRoutes from './routes/auth.js'; // Use the new auth route
+import express from "express";
+import dotenv from "dotenv";
+import { connectDB } from "./config/db.js";
+import productRoutes from "./routes/products.js";
+import authRoutes from "./routes/auth.js";
+import cartRoutes from "./routes/cart.js";
+import orderRoutes from "./routes/orders.js";
+import reservationRoutes from "./routes/reservations.js";
+import adminRoutes from "./routes/admin.js";
+import cors from "cors";
 
-dotenv.config(); // Make sure it finds the .env file
+dotenv.config();
 
 const app = express();
-
-// --- Middleware ---
-app.use(cors()); // Allows your frontend to make requests
-app.use(express.json()); // Allows the server to read JSON
-
-// --- Routes ---
-app.use('/api/auth', authRoutes); // Connects /api/auth to your new auth.js
-
-// --- Database Connection ---
 const PORT = process.env.PORT || 4000;
-const MONGO_URI = process.env.MONGO_URI;
 
-mongoose.connect(MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => {
-    console.log('✅ Successfully connected to MongoDB!');
-    app.listen(PORT, () => console.log(`✅ Backend server running on port: ${PORT}`));
-})
-.catch((error) => {
-    console.error('❌ MongoDB connection error:', error.message);
+// Middleware - CORS must come before routes
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:5174'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+app.use(express.json());
+
+// Routes
+app.use("/api/products", productRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/cart", cartRoutes);
+app.use("/api/orders", orderRoutes);
+app.use("/api/reservations", reservationRoutes);
+app.use("/api/admin", adminRoutes);
+
+// Health check route
+app.get("/", (req, res) => {
+  res.json({ message: "Eris Cafe API is running" });
 });
+
+// Connect to MongoDB and start server
+connectDB()
+  .then(() => {
+    console.log("Connected to MongoDB for data persistence");
+    app.listen(PORT, () => {
+      console.log(`Server is running on localhost:${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.error("Failed to connect to MongoDB:", error);
+    process.exit(1);
+  });

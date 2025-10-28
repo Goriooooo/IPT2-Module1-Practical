@@ -1,409 +1,303 @@
-import React, { useState } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import hero from '../assets/hero/HERO2.jpg'
-import logo from '../assets/cafe_logo.png'
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import Navigation from '../components/Navigation';
+import axios from 'axios';
 
 const Booking = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(1);
-  const [selectedDestination, setSelectedDestination] = useState(null);
-  const [showBookingForm, setShowBookingForm] = useState(false);
-  const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    checkIn: '',
-    checkOut: '',
-    guests: '1',
-    specialRequests: ''
-  });
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const [reservations, setReservations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const destinations = [
-    {
-      id: 1,
-      src: "https://images.unsplash.com/photo-1751199200315-ec34e0a79cf5?q=80&w=2162&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80",
-      alt: "Mountain landscape",
-      name: "Group Workspace",
-      location: "Book Left or Right side of the cafe",
-      price: "299php/session"
-    },
-    {
-      id: 2,
-      src: "https://images.unsplash.com/photo-1751199199992-b32cefa81c72?q=80&w=2270&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80",
-      alt: "Ocean boat",
-      name: "Premium Table",
-      location: "Exclusive entire cafe during your stay",
-      price: "599php/session"
-    },
-    {
-      id: 3,
-      src: "https://images.unsplash.com/photo-1664790776706-fd4b97297e5a?q=80&w=3540&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80",
-      alt: "Forest stairs",
-      name: "Open Workspace",
-      location: "Book a specific table",
-      price: "199php/session"
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/');
+      return;
     }
-  ];
+    fetchReservations();
+  }, [isAuthenticated, navigate]);
 
-  const nextSlide = () => {
-    setCurrentIndex((prevIndex) => 
-      prevIndex === destinations.length - 1 ? 0 : prevIndex + 1
-    );
+  const fetchReservations = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('appToken');
+      
+      if (!token) {
+        navigate('/');
+        return;
+      }
+
+      const response = await axios.get('http://localhost:4000/api/reservations/my-reservations', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.data.success) {
+        setReservations(response.data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching reservations:', error);
+      if (error.response?.status === 401) {
+        navigate('/');
+      } else {
+        setError('Failed to load reservations');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const prevSlide = () => {
-    setCurrentIndex((prevIndex) => 
-      prevIndex === 0 ? destinations.length - 1 : prevIndex - 1
-    );
+  const handleCancelReservation = async (reservationId) => {
+    if (!window.confirm('Are you sure you want to cancel this reservation?')) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('appToken');
+      
+      const response = await axios.delete(
+        `http://localhost:4000/api/reservations/${reservationId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+
+      if (response.data.success) {
+        alert('Reservation cancelled successfully');
+        fetchReservations();
+      }
+    } catch (error) {
+      console.error('Error cancelling reservation:', error);
+      alert(error.response?.data?.message || 'Failed to cancel reservation');
+    }
   };
 
-  const goToSlide = (index) => {
-    setCurrentIndex(index);
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'confirmed':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'completed':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'no-show':
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
   };
 
-  const selectDestination = () => {
-    setSelectedDestination(destinations[currentIndex]);
-    setShowBookingForm(true);
-  };
-
-  const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Handle form submission here
-    alert(`Booking request submitted for ${selectedDestination.name}!`);
-    console.log('Booking data:', { destination: selectedDestination, ...formData });
-  };
-
-  const resetForm = () => {
-    setShowBookingForm(false);
-    setSelectedDestination(null);
-    setFormData({
-      fullName: '',
-      email: '',
-      phone: '',
-      checkIn: '',
-      checkOut: '',
-      guests: '1',
-      specialRequests: ''
-    });
-  };
-
-  const getImagePosition = (index) => {
-    if (index === currentIndex) return 'translate-x-0 scale-100 z-30';
-    if (index === (currentIndex - 1 + destinations.length) % destinations.length) {
-      return 'sm:-translate-x-32 -translate-x-16 scale-90 z-20';
-    }
-    if (index === (currentIndex + 1) % destinations.length) {   
-      return 'sm:translate-x-32 translate-x-16 scale-90 z-20';
-    }
-    return 'translate-x-0 scale-75 opacity-0 z-10';
-  };
-
-  if (showBookingForm) {
+  if (loading) {
     return (
-      <div 
-        className="min-h-screen flex items-center justify-center p-4 sm:p-8"
-        style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${hero})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed'
-        }}
-      >
-        <div className="w-full max-w-2xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl p-4 sm:p-8 m-4">
-          {/* Header */}
-          <div className="text-center mb-6 sm:mb-8">
-            <div className="w-16 h-16 sm:w-24 sm:h-24 mx-auto mb-4 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg">
-              <img 
-                src={selectedDestination.src} 
-                alt={selectedDestination.alt}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Book Your Stay</h2>
-            <p className="text-sm sm:text-base text-gray-600">
-              {selectedDestination.name} • {selectedDestination.location}
-            </p>
-            <p className="text-lg sm:text-2xl font-semibold text-blue-600 mt-2">{selectedDestination.price}</p>
+      <div className="min-h-screen bg-[#EDEDE6]">
+        <Navigation />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading your reservations...</p>
           </div>
-
-          {/* Booking Form */}
-          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-              <div>
-                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Full Name</label>
-                <input
-                  type="text"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  placeholder="Enter your full name"
-                />
-              </div>
-              <div>
-                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  placeholder="your@email.com"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-              <div>
-                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Phone Number</label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  placeholder="+1 (555) 123-4567"
-                />
-              </div>
-              <div>
-                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Number of Guests</label>
-                <select
-                  name="guests"
-                  value={formData.guests}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                >
-                  {[1,2,3,4,5,6,7,8].map(num => (
-                    <option key={num} value={num}>{num} Guest{num > 1 ? 's' : ''}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-              <div>
-                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Check-in Date</label>
-                <input
-                  type="date"
-                  name="checkIn"
-                  value={formData.checkIn}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Check-out Date</label>
-                <input
-                  type="date"
-                  name="checkOut"
-                  value={formData.checkOut}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Special Requests</label>
-              <textarea
-                name="specialRequests"
-                value={formData.specialRequests}
-                onChange={handleInputChange}
-                rows="3"
-                className="w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
-                placeholder="Any special requests or dietary requirements..."
-              ></textarea>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-col gap-3 sm:flex-row sm:gap-4 pt-4 sm:pt-6">
-              <button
-                type="button"
-                onClick={resetForm}
-                className="flex-1 px-4 py-2 sm:px-6 sm:py-3 text-sm sm:text-base border-2 border-gray-300 text-gray-700 font-semibold rounded-lg sm:rounded-xl hover:bg-gray-50 transition-all duration-200"
-              >
-                Back to Selection
-              </button>
-              <button
-                type="submit"
-                className="flex-1 px-4 py-2 sm:px-6 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-blue-500 to-teal-500 text-white font-semibold rounded-lg sm:rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-200"
-              >
-                Confirm Booking
-              </button>
-            </div>
-          </form>
         </div>
       </div>
     );
   }
 
   return (
-    <motion.div 
-      className="min-h-screen flex items-center justify-center p-4 sm:p-8"
-      style={{
-        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${hero})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed'
-      }}
-      initial={{ width: 0, opacity: 0 }}
-        animate={{ width: "100vw", opacity: 1 }}
-        exit={{
-            x: window.innerWidth,
-            opacity: 0,
-            transition: { duration: 0.1, ease: "easeInOut"},
-        }}
-        transition={{ duration: 0.1, ease: "easeInOut" }}
-    >
-      <div className="w-full max-w-4xl">
-          {/* Header */}
+    <div className="min-h-screen bg-[#EDEDE6]">
+      <Navigation />
       
-      <header className="relative z-50 px-4 sm:px-6 lg:px-8 py-4 justify-center items-center">
-        
-        <nav className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <img className='w-12' src={logo} alt="" />
-            <span className="text-xl font-bold text-amber-50">Eris Cafe.</span>
-          </div>
-
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center justify-center space-x-8">
-            <RouterLink to={"/home"} className="hover:text-amber-200 transition-colors font-medium text-amber-50">HOME</RouterLink>
-            <RouterLink to={"/menu"} className="hover:text-amber-200 transition-colors font-medium text-amber-50">MENU</RouterLink>
-            <a href="#" className="hover:text-amber-200 transition-colors font-medium text-amber-50">ABOUT US</a>
-          </div>
-
-          {/* Profile & Mobile Menu */}
-          <div className="flex items-center space-x-4">
-            <div className="hidden md:flex items-center space-x-2">
-              <div className="w-10 h-10 bg-gradient-to-r from-amber-500 to-orange-600 rounded-full flex items-center justify-center">
-                <span className="text-sm font-bold text-white">JD</span>
-              </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-playfair font-bold text-gray-900">
+                My Reservations
+              </h1>
+              <p className="text-gray-600 mt-2">
+                View and manage your table reservations
+              </p>
             </div>
-            
-            <button 
-              className="md:hidden text-amber-50 hover:text-amber-200"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            <Link
+              to="/reservation"
+              className="px-6 py-3 bg-amber-600 text-white font-semibold rounded-lg hover:bg-amber-700 transition-colors shadow-md"
             >
-              {isMenuOpen ? '✕' : '☰'}
-            </button>
+              + New Reservation
+            </Link>
           </div>
-        </nav>
-
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 right-0 bg-amber-900/95 backdrop-blur-sm p-4 space-y-4">
-            <a href="#" className="block hover:text-amber-200 transition-colors font-medium text-amber-50">HOME</a>
-            <a href="#" className="block hover:text-amber-200 transition-colors font-medium text-amber-50">MENU</a>
-            <a href="#" className="block hover:text-amber-200 transition-colors font-medium text-amber-50">ABOUT US</a>
-          </div>
-        )}
-      </header>
-        {/* Hero Title */}
-        <div className="text-center mb-8 sm:mb-16 px-4">
-          <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-white mb-4 sm:mb-6 tracking-tight drop-shadow-lg">
-            Co-work
-            <span className="bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent"> With us</span>
-          </h1>
-          <p className="text-base sm:text-lg text-gray-100 max-w-2xl mx-auto drop-shadow-md">
-            Select different types of seats.
-          </p>
         </div>
 
-        {/* Image Carousel */}
-        <div className="relative flex items-center justify-center h-64 sm:h-80 md:h-96 mb-6 sm:mb-8">
-          {/* Images */}
-          <div className="relative w-48 sm:w-64 md:w-80 h-full">
-            {destinations.map((destination, index) => (
+        {error && (
+          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+            {error}
+          </div>
+        )}
+
+        {reservations.length === 0 ? (
+          <div className="text-center py-16 bg-white rounded-xl shadow-sm">
+            <svg
+              className="mx-auto h-24 w-24 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
+            </svg>
+            <h3 className="mt-4 text-xl font-semibold text-gray-900">No reservations yet</h3>
+            <p className="mt-2 text-gray-600">
+              Start by making your first table reservation
+            </p>
+            <Link
+              to="/reservation"
+              className="mt-6 inline-block px-6 py-3 bg-amber-600 text-white font-semibold rounded-lg hover:bg-amber-700 transition-colors"
+            >
+              Make a Reservation
+            </Link>
+          </div>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {reservations.map((reservation) => (
               <div
-                key={destination.id}
-                className={`absolute inset-0 transition-all duration-700 ease-out transform ${getImagePosition(index)} cursor-pointer`}
-                onClick={() => goToSlide(index)}
+                key={reservation._id}
+                className="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden"
               >
-                <div className="w-full h-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl bg-white p-1 sm:p-2">
-                  <img
-                    src={destination.src}
-                    alt={destination.alt}
-                    className="w-full h-full object-cover rounded-xl sm:rounded-2xl transition-transform duration-300 hover:scale-105"
-                  />
+                <div className="bg-gradient-to-r from-amber-500 to-orange-600 px-6 py-4">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-white text-sm font-medium">Reservation ID</p>
+                      <p className="text-white text-xs opacity-90 font-mono">
+                        {reservation.reservationId}
+                      </p>
+                    </div>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(
+                        reservation.status
+                      )}`}
+                    >
+                      {reservation.status.charAt(0).toUpperCase() + reservation.status.slice(1)}
+                    </span>
+                  </div>
                 </div>
-                {/* Overlay for non-active images */}
-                {index !== currentIndex && (
-                  <div className="absolute inset-0 bg-stone-700/50 bg-opacity-80 rounded-2xl sm:rounded-3xl"></div>
+
+                <div className="p-6 space-y-4">
+                  <div className="flex items-start space-x-3">
+                    <svg
+                      className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">
+                        {formatDate(reservation.date)}
+                      </p>
+                      <p className="text-sm text-gray-600">{reservation.time}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-3">
+                    <svg
+                      className="w-5 h-5 text-gray-400 flex-shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                      />
+                    </svg>
+                    <p className="text-sm text-gray-700">
+                      {reservation.guests} {reservation.guests === 1 ? 'Guest' : 'Guests'}
+                    </p>
+                  </div>
+
+                  <div className="flex items-start space-x-3">
+                    <svg
+                      className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      />
+                    </svg>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">
+                        {reservation.customerInfo.name}
+                      </p>
+                      <p className="text-xs text-gray-600">{reservation.customerInfo.email}</p>
+                      <p className="text-xs text-gray-600">{reservation.customerInfo.phone}</p>
+                    </div>
+                  </div>
+
+                  {reservation.specialRequests && (
+                    <div className="pt-3 border-t border-gray-100">
+                      <p className="text-xs font-semibold text-gray-700 mb-1">Special Requests:</p>
+                      <p className="text-xs text-gray-600 italic">{reservation.specialRequests}</p>
+                    </div>
+                  )}
+                </div>
+
+                {reservation.status === 'confirmed' && (
+                  <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
+                    <button
+                      onClick={() => handleCancelReservation(reservation._id)}
+                      className="w-full px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors text-sm"
+                    >
+                      Cancel Reservation
+                    </button>
+                  </div>
+                )}
+
+                {reservation.status === 'cancelled' && reservation.cancelledAt && (
+                  <div className="px-6 py-3 bg-red-50 border-t border-red-100">
+                    <p className="text-xs text-red-600">
+                      Cancelled on{' '}
+                      {new Date(reservation.cancelledAt).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+                    </p>
+                  </div>
                 )}
               </div>
             ))}
           </div>
-
-          {/* Navigation Arrows */}
-          <button
-            onClick={prevSlide}
-            className="absolute left-2 sm:left-4 md:left-8 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-stone-400 hover:bg-yellow-500 rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 transition-all duration-200 z-40 group"
-          >
-            <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white transform group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-
-          <button
-            onClick={nextSlide}
-            className="absolute right-2 sm:right-4 md:right-8 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-stone-400 hover:bg-yellow-500 rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 transition-all duration-200 z-40 group"
-          >
-            <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white transform group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Destination Info */}
-        <div className="text-center mb-6 sm:mb-8 px-4">
-          <h3 className="text-xl sm:text-2xl font-bold text-white mb-2 drop-shadow-md">
-            {destinations[currentIndex].name}
-          </h3>
-          <p className="text-sm sm:text-base text-gray-200 mb-2 drop-shadow-sm">{destinations[currentIndex].location}</p>
-          <p className="text-lg sm:text-xl font-semibold text-yellow-400 drop-shadow-sm">{destinations[currentIndex].price}</p>
-        </div>
-
-        {/* Dots Indicator */}
-        <div className="flex justify-center space-x-2 sm:space-x-3 mb-8 sm:mb-12">
-          {destinations.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => goToSlide(index)}
-              className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${
-                index === currentIndex 
-                  ? 'bg-white scale-125 shadow-lg' 
-                  : 'bg-gray-400 hover:bg-gray-300'
-              }`}
-            />
-          ))}
-        </div>
-
-        {/* Select Destination Button */}
-        <div className="text-center px-4">
-          <button 
-            onClick={selectDestination}
-            className="group relative px-6 py-3 sm:px-12 sm:py-4 text-sm sm:text-base bg-gradient-to-r from-stone-500 to-amber-500 text-white font-semibold rounded-full transform transition-all duration-300 hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-50 shadow-lg"
-          >
-            <span className="relative z-10">Book Seat.</span>
-            <div className="absolute inset-0 bg-gradient-to-r from-amber-500 to-stone-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          </button>
-        </div>
+        )}
       </div>
-    </motion.div>
+    </div>
   );
 };
 

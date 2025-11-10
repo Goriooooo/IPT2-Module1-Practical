@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Eye, X } from 'lucide-react';
+import { Search, Eye, X, Clock, ChefHat, Package, CheckCircle, GripVertical, LayoutGrid, List } from 'lucide-react';
 import axios from 'axios';
 
 const OrdersPage = () => {
@@ -10,10 +10,20 @@ const OrdersPage = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [viewMode, setViewMode] = useState('table'); // 'table' or 'kanban'
+  const [draggedOrder, setDraggedOrder] = useState(null);
 
   useEffect(() => {
     fetchOrders();
   }, []);
+
+  const kanbanColumns = [
+    { id: 'pending', label: 'Pending', icon: Clock, color: 'bg-orange-500', emoji: '⏰' },
+    { id: 'confirmed', label: 'Confirmed', icon: CheckCircle, color: 'bg-cyan-500', emoji: '✓' },
+    { id: 'preparing', label: 'Preparing', icon: ChefHat, color: 'bg-blue-500', emoji: '👨‍🍳' },
+    { id: 'ready', label: 'Ready', icon: Package, color: 'bg-purple-500', emoji: '📦' },
+    { id: 'completed', label: 'Completed', icon: CheckCircle, color: 'bg-green-500', emoji: '✅' },
+  ];
 
   const fetchOrders = async () => {
     try {
@@ -112,6 +122,30 @@ const OrdersPage = () => {
     setShowModal(true);
   };
 
+  // Drag and Drop Handlers
+  const handleDragStart = (e, order) => {
+    setDraggedOrder(order);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = async (e, newStatus) => {
+    e.preventDefault();
+    if (draggedOrder && draggedOrder.status !== newStatus) {
+      // Update status via API
+      await updateOrderStatus(draggedOrder._id, newStatus);
+      setDraggedOrder(null);
+    }
+  };
+
+  const getOrdersByStatus = (status) => {
+    return filteredOrders.filter(order => order.status === status);
+  };
+
   const filteredOrders = orders.filter(order => {
     const matchesSearch = 
       order.orderId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -148,7 +182,35 @@ const OrdersPage = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Orders Management</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-800">Orders Management</h1>
+        
+        {/* View Mode Toggle */}
+        <div className="flex gap-2 bg-gray-200 rounded-lg p-1">
+          <button
+            onClick={() => setViewMode('table')}
+            className={`px-4 py-2 rounded-md flex items-center gap-2 transition-colors ${
+              viewMode === 'table' 
+                ? 'bg-white text-amber-600 shadow' 
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            <List size={18} />
+            Table View
+          </button>
+          <button
+            onClick={() => setViewMode('kanban')}
+            className={`px-4 py-2 rounded-md flex items-center gap-2 transition-colors ${
+              viewMode === 'kanban' 
+                ? 'bg-white text-amber-600 shadow' 
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            <LayoutGrid size={18} />
+            Kanban Board
+          </button>
+        </div>
+      </div>
       
       {/* Filters */}
       <div className="mb-6 flex gap-4">
@@ -161,21 +223,23 @@ const OrdersPage = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <div>
-          <select
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600"
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-          >
-            <option>All</option>
-            <option>Pending</option>
-            <option>Confirmed</option>
-            <option>Preparing</option>
-            <option>Ready</option>
-            <option>Completed</option>
-            <option>Cancelled</option>
-          </select>
-        </div>
+        {viewMode === 'table' && (
+          <div>
+            <select
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option>All</option>
+              <option>Pending</option>
+              <option>Confirmed</option>
+              <option>Preparing</option>
+              <option>Ready</option>
+              <option>Completed</option>
+              <option>Cancelled</option>
+            </select>
+          </div>
+        )}
         <button
           onClick={fetchOrders}
           className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
@@ -184,8 +248,100 @@ const OrdersPage = () => {
         </button>
       </div>
 
-      {/* Orders Table */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      {/* Kanban Board View */}
+      {viewMode === 'kanban' ? (
+        <div className="flex gap-4 overflow-x-auto pb-4">
+          <div className="flex gap-4">
+            {kanbanColumns.map(column => {
+              const columnOrders = getOrdersByStatus(column.id);
+              const Icon = column.icon;
+              
+              return (
+                <div key={column.id} className="flex flex-col flex-shrink-0 w-80">
+                  {/* Column Header */}
+                  <div className="bg-gray-800 rounded-t-lg p-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">{column.emoji}</span>
+                      <h2 className="text-white font-semibold">{column.label}</h2>
+                    </div>
+                    <span className="bg-gray-700 text-white text-xs px-2 py-1 rounded-full">
+                      {columnOrders.length}
+                    </span>
+                  </div>
+
+                  {/* Drop Zone */}
+                  <div
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, column.id)}
+                    className="bg-gray-100 rounded-b-lg p-3 min-h-[600px] flex flex-col gap-3"
+                  >
+                    {columnOrders.map(order => (
+                      <div
+                        key={order._id}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, order)}
+                        className="bg-white rounded-lg p-4 shadow-md cursor-move hover:shadow-xl transition-all hover:scale-105 border-l-4 border-transparent hover:border-amber-500"
+                      >
+                        {/* Order Header */}
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-amber-600 font-bold text-sm">{order.orderId}</span>
+                              <GripVertical className="w-4 h-4 text-gray-400" />
+                              {order.cancelRequested && (
+                                <span className="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 animate-pulse">
+                                  Cancel Request
+                                </span>
+                              )}
+                            </div>
+                            <h3 className="text-gray-800 font-semibold">{order.customerInfo?.name || 'N/A'}</h3>
+                            <p className="text-gray-500 text-xs">{order.customerInfo?.email}</p>
+                          </div>
+                          <span className="text-gray-400 text-xs">
+                            {new Date(order.createdAt).toLocaleTimeString('en-US', { 
+                              hour: '2-digit', 
+                              minute: '2-digit' 
+                            })}
+                          </span>
+                        </div>
+
+                        {/* Order Details */}
+                        <div className="space-y-2">
+                          <div className="flex items-start gap-2">
+                            <span className="text-gray-400 text-xs">📝</span>
+                            <p className="text-gray-600 text-sm flex-1">
+                              {order.items?.slice(0, 2).map(item => item.name).join(', ')}
+                              {order.items?.length > 2 && ` +${order.items.length - 2} more`}
+                            </p>
+                          </div>
+                          
+                          <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+                            <span className="text-green-600 font-bold">${order.totalAmount?.toFixed(2)}</span>
+                            <button
+                              onClick={() => viewOrderDetails(order)}
+                              className="text-amber-600 hover:text-amber-700 text-sm font-medium"
+                            >
+                              View Details
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    {columnOrders.length === 0 && (
+                      <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">
+                        Drop orders here
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+        /* Table View */
+        <div className="bg-white rounded-lg shadow-md overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -252,6 +408,7 @@ const OrdersPage = () => {
           </tbody>
         </table>
       </div>
+      )}
 
       {/* Order Details Modal */}
       {showModal && selectedOrder && (
@@ -385,6 +542,13 @@ const OrdersPage = () => {
               )}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Info Banner for Kanban Mode */}
+      {viewMode === 'kanban' && (
+        <div className="mt-6 bg-amber-500 rounded-lg p-4 text-white text-center shadow-lg">
+          <p className="text-sm">💡 <strong>Tip:</strong> Drag and drop orders between columns to update their status instantly</p>
         </div>
       )}
     </div>

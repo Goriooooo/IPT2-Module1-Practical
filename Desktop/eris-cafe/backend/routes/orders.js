@@ -119,8 +119,9 @@ router.patch('/:id/status', authMiddleware, async (req, res) => {
       });
     }
 
-    const order = await Order.findOneAndUpdate(
-      { _id: req.params.id, userId: req.user.id },
+    // Find order without userId restriction (allow admin to update any order)
+    const order = await Order.findByIdAndUpdate(
+      req.params.id,
       { status },
       { new: true }
     );

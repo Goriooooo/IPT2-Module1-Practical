@@ -5,7 +5,7 @@ import Navigation from '../components/Navigation';
 import axios from 'axios';
 
 const Reservation = () => {
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [tables, setTables] = useState([
     { id: 1, occupied: true },
@@ -51,11 +51,42 @@ const Reservation = () => {
       alert('Please fill in all required fields');
       return;
     }
+
+    // Validate date is not in the past
+    const selectedDate = new Date(formData.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to start of day
+    selectedDate.setHours(0, 0, 0, 0);
+
+    if (selectedDate < today) {
+      alert('Cannot make reservations for past dates. Please select today or a future date.');
+      return;
+    }
+
+    // If reservation is for today, validate time is not in the past
+    if (selectedDate.getTime() === today.getTime()) {
+      const selectedTime = formData.time.split(':');
+      const selectedDateTime = new Date();
+      selectedDateTime.setHours(parseInt(selectedTime[0]), parseInt(selectedTime[1]), 0, 0);
+      
+      const currentTime = new Date();
+      
+      if (selectedDateTime < currentTime) {
+        alert('Cannot make reservations for past times. Please select a future time.');
+        return;
+      }
+    }
     
     try {
+      const token = localStorage.getItem('appToken');
+      
+      if (!token) {
+        alert('Please sign in to make a reservation');
+        navigate('/');
+        return;
+      }
+
       const reservationData = {
-        userId: user.sub,
-        tableId: selectedTable.id,
         customerInfo: {
           name: formData.name,
           email: formData.email,
@@ -63,10 +94,18 @@ const Reservation = () => {
         },
         date: formData.date,
         time: formData.time,
-        guests: formData.guests
+        guests: parseInt(formData.guests)
       };
 
-      const response = await axios.post('http://localhost:3000/api/auth/reservations', reservationData);
+      const response = await axios.post('http://localhost:4000/api/reservations/create', 
+        reservationData,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
       
       if (response.data.success) {
         setTables(tables.map(t => 
@@ -84,12 +123,27 @@ const Reservation = () => {
         setShowModal(false);
         setSelectedTable(null);
         
-        alert('Reservation confirmed! Check your orders page.');
-        navigate('/orders');
+        const reservationDate = new Date(formData.date).toLocaleDateString('en-US', { 
+          weekday: 'long', 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        });
+        
+        alert(`Reservation confirmed for ${reservationDate} at ${formData.time}!\n\nReservation ID: ${response.data.data.reservationId}\n\nCheck your bookings page for details.`);
+        navigate('/booking');
       }
     } catch (error) {
       console.error('Reservation error:', error);
-      alert('Failed to create reservation. Please try again.');
+      
+      if (error.response?.status === 401) {
+        alert('Your session has expired. Please sign in again.');
+        navigate('/');
+      } else if (error.response?.data?.message) {
+        alert(`Reservation failed: ${error.response.data.message}`);
+      } else {
+        alert('Failed to create reservation. Please try again.');
+      }
     }
   };
 
@@ -111,22 +165,22 @@ const Reservation = () => {
         <div className=" font-playfair relative w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 flex items-center justify-center">
           {/* Top chair */}
           <div className={`absolute -top-4 sm:-top-5 md:-top-6 left-1/2 -translate-x-1/2 w-6 h-8 sm:w-8 sm:h-10 md:w-10 md:h-12 rounded-t-lg transition-colors duration-300 ${
-            isOccupied ? 'bg-amber-900' : isHovered ? 'bg-yellow-600' : 'bg-gray-400'
+            isOccupied ? 'bg-amber-900' : isHovered ? 'bg-[#B0CE88]' : 'bg-gray-400'
           }`}></div>
           
           {/* Right chair */}
           <div className={`absolute -right-4 sm:-right-5 md:-right-6 top-1/2 -translate-y-1/2 w-8 h-6 sm:w-10 sm:h-8 md:w-12 md:h-10 rounded-r-lg transition-colors duration-300 ${
-            isOccupied ? 'bg-amber-900' : isHovered ? 'bg-yellow-600' : 'bg-gray-400'
+            isOccupied ? 'bg-amber-900' : isHovered ? 'bg-[#B0CE88]' : 'bg-gray-400'
           }`}></div>
           
           {/* Bottom chair */}
           <div className={`absolute -bottom-4 sm:-bottom-5 md:-bottom-6 left-1/2 -translate-x-1/2 w-6 h-8 sm:w-8 sm:h-10 md:w-10 md:h-12 rounded-b-lg transition-colors duration-300 ${
-            isOccupied ? 'bg-amber-900' : isHovered ? 'bg-yellow-600' : 'bg-gray-400'
+            isOccupied ? 'bg-amber-900' : isHovered ? 'bg-[#B0CE88]' : 'bg-gray-400'
           }`}></div>
           
           {/* Left chair */}
           <div className={`absolute -left-4 sm:-left-5 md:-left-6 top-1/2 -translate-y-1/2 w-8 h-6 sm:w-10 sm:h-8 md:w-12 md:h-10 rounded-l-lg transition-colors duration-300 ${
-            isOccupied ? 'bg-amber-900' : isHovered ? 'bg-yellow-600' : 'bg-gray-400'
+            isOccupied ? 'bg-amber-900' : isHovered ? 'bg-[#B0CE88]' : 'bg-gray-400'
           }`}></div>
           
           {/* Center table */}
@@ -134,7 +188,7 @@ const Reservation = () => {
             isOccupied 
               ? 'bg-amber-800 text-amber-900' 
               : isHovered 
-                ? 'bg-yellow-500 text-white' 
+                ? 'bg-[#B0CE88] text-white' 
                 : 'bg-gray-200 text-gray-700'
           }`}>
             {table.id}
@@ -252,7 +306,7 @@ const Reservation = () => {
                   value={formData.name}
                   onChange={handleInputChange}
                   className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                  placeholder="John Doe"
+                  placeholder="Full Name"
                 />
               </div>
 
@@ -266,7 +320,7 @@ const Reservation = () => {
                   value={formData.email}
                   onChange={handleInputChange}
                   className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                  placeholder="john@example.com"
+                  placeholder="eris@example.com"
                 />
               </div>
 
@@ -280,7 +334,7 @@ const Reservation = () => {
                   value={formData.phone}
                   onChange={handleInputChange}
                   className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                  placeholder="+1 (555) 000-0000"
+                  placeholder="09XX XXX XXXX"
                 />
               </div>
 
@@ -313,6 +367,9 @@ const Reservation = () => {
                   min={new Date().toISOString().split('T')[0]}
                   className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  Select today or a future date
+                </p>
               </div>
 
               <div>
@@ -326,6 +383,11 @@ const Reservation = () => {
                   onChange={handleInputChange}
                   className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  {formData.date === new Date().toISOString().split('T')[0] 
+                    ? 'Select a future time for today' 
+                    : 'Select your preferred time'}
+                </p>
               </div>
 
               {/* Modal Footer */}

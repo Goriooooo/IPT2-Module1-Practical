@@ -65,6 +65,16 @@ export default function CartPage() {
     setTouchStart(null);
   };
 
+  const handleDelete = (item) => {
+    // Use the item's id for deletion (works for both guest and authenticated users)
+    deleteItem(item.id);
+  };
+
+  const handleQuantityUpdate = (item, delta) => {
+    // Use the item's id for quantity update
+    updateQuantity(item.id, delta);
+  };
+
   const handleCheckout = () => {
     navigate('/checkout');
   };
@@ -128,11 +138,11 @@ export default function CartPage() {
             {/* Cart Items */}
             <div className="space-y-6">
           {cartItems.map((item) => (
-            <div key={item.id} className="relative overflow-hidden bg-[#EDEDE6]">
+            <div key={item._id || item.id} className="relative overflow-hidden bg-[#EDEDE6]">
               {/* Delete Button Background */}
               <div className="absolute right-0 top-0 h-full w-24 bg-red-500 flex items-center justify-center">
                 <button
-                  onClick={() => deleteItem(item.id)}
+                  onClick={() => handleDelete(item)}
                   className="text-white h-full w-full flex items-center justify-center"
                 >
                   <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -172,7 +182,7 @@ export default function CartPage() {
                   <div className="flex-shrink-0">
                     <div className="inline-flex items-center border border-stone-300 rounded bg-white">
                       <button
-                        onClick={() => updateQuantity(item.id, -1)}
+                        onClick={() => handleQuantityUpdate(item, -1)}
                         className="px-2 sm:px-3 py-1 hover:bg-stone-100 transition text-lg"
                       >
                         -
@@ -181,7 +191,7 @@ export default function CartPage() {
                         {item.quantity}
                       </span>
                       <button
-                        onClick={() => updateQuantity(item.id, 1)}
+                        onClick={() => handleQuantityUpdate(item, 1)}
                         className="px-2 sm:px-3 py-1 hover:bg-stone-100 transition text-lg"
                       >
                         +

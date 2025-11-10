@@ -108,7 +108,7 @@ export default function ProductPage() {
                 {product.name}
               </h1>
               <p className="text-3xl md:text-4xl font-light text-stone-800">
-                {product.price}
+                ₱{product.price}
               </p>
             </div>
 

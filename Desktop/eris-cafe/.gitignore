@@ -28,5 +28,13 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
+
+# Backups
+backend/backups/
+backend/google-tokens.json
+
+# MongoDB dumps
+*.gz
+dump/
 *.swo
 *~

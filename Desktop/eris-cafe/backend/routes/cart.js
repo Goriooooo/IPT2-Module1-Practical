@@ -7,12 +7,15 @@ const router = express.Router();
 // Get user's cart
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).populate('cart.productId');
+    const user = await User.findById(req.user.id);
     
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
+    // Return cart without populating - frontend just needs the productId reference
+    console.log(`Cart loaded for user ${req.user.id}: ${user.cart.length} items`);
+    
     res.json({ success: true, data: user.cart });
   } catch (error) {
     console.error('Get cart error:', error);
@@ -31,16 +34,17 @@ router.post('/add', authMiddleware, async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    // Check if item already exists in cart
+    // Check if item already exists in cart (same product AND same size)
     const existingItemIndex = user.cart.findIndex(
-      item => item.productId && item.productId.toString() === productId
+      item => item.productId && item.productId.toString() === productId && item.size === size
     );
 
     if (existingItemIndex > -1) {
-      // Update quantity if item exists
+      // Update quantity if item exists (same product, same size)
       user.cart[existingItemIndex].quantity += quantity || 1;
+      console.log(`Updated existing cart item: ${name} (${size}) - new quantity: ${user.cart[existingItemIndex].quantity}`);
     } else {
-      // Add new item to cart
+      // Add new item to cart (different size or different product)
       user.cart.push({
         productId,
         name,
@@ -51,9 +55,12 @@ router.post('/add', authMiddleware, async (req, res) => {
         image,
         addedAt: new Date()
       });
+      console.log(`Added new cart item: ${name} (${size})`);
     }
 
     await user.save();
+
+    console.log(`Item added to cart for user ${req.user.id}. Cart size: ${user.cart.length}`);
 
     res.json({ 
       success: true, 
@@ -109,8 +116,13 @@ router.delete('/remove/:itemId', authMiddleware, async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
+    const initialLength = user.cart.length;
     user.cart = user.cart.filter(item => item._id.toString() !== itemId);
+    const finalLength = user.cart.length;
+    
     await user.save();
+
+    console.log(`Cart item removed for user ${req.user.id}. Item ID: ${itemId}. Before: ${initialLength}, After: ${finalLength}`);
 
     res.json({ 
       success: true, 
@@ -160,17 +172,21 @@ router.post('/sync', authMiddleware, async (req, res) => {
     // Merge cart items
     if (cartItems && Array.isArray(cartItems)) {
       cartItems.forEach(newItem => {
+        // Extract productId from various possible fields
+        const productId = newItem.productId || newItem._id || newItem.id;
+        
+        // Check both productId AND size
         const existingItemIndex = user.cart.findIndex(
-          item => item.productId && item.productId.toString() === newItem.productId
+          item => item.productId && item.productId.toString() === productId && item.size === newItem.size
         );
 
         if (existingItemIndex > -1) {
-          // Update quantity if item exists
+          // Update quantity if item exists (same product, same size)
           user.cart[existingItemIndex].quantity += newItem.quantity || 1;
         } else {
-          // Add new item
+          // Add new item (different size or different product)
           user.cart.push({
-            productId: newItem.productId || newItem.id,
+            productId: productId,
             name: newItem.name,
             price: newItem.price,
             quantity: newItem.quantity || 1,
@@ -184,6 +200,8 @@ router.post('/sync', authMiddleware, async (req, res) => {
     }
 
     await user.save();
+    
+    console.log(`Cart synced for user ${req.user.id}. Total items: ${user.cart.length}`);
 
     res.json({ 
       success: true, 

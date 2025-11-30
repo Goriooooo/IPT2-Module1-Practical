@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { SkeletonProductDetail } from '../components/SkeletonLoaders';
 
 export default function ProductPage() {
   const location = useLocation();
@@ -10,6 +11,30 @@ export default function ProductPage() {
   
   const [quantity, setQuantity] = useState(1);
   const [showNotification, setShowNotification] = useState(false);
+  const [selectedSize, setSelectedSize] = useState(null);
+  const [currentPrice, setCurrentPrice] = useState(product?.price || 0);
+  const [loading, setLoading] = useState(true);
+
+  // Initialize selected size and price
+  useEffect(() => {
+    if (product?.hasSizes && product?.sizes?.length > 0) {
+      setSelectedSize(product.sizes[0].name);
+      setCurrentPrice(product.sizes[0].price);
+    } else {
+      setCurrentPrice(product?.price || 0);
+    }
+    // Simulate loading
+    const timer = setTimeout(() => setLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, [product]);
+
+  const handleSizeChange = (sizeName) => {
+    setSelectedSize(sizeName);
+    const size = product.sizes.find(s => s.name === sizeName);
+    if (size) {
+      setCurrentPrice(size.price);
+    }
+  };
 
   const decrementQuantity = () => {
     if (quantity > 1) setQuantity(quantity - 1);
@@ -20,7 +45,10 @@ export default function ProductPage() {
   };
 
   const handleAddToCart = () => {
-    addToCart(product, quantity);
+    const productToAdd = product.hasSizes 
+      ? { ...product, selectedSize, price: currentPrice }
+      : product;
+    addToCart(productToAdd, quantity);
     setShowNotification(true);
     setQuantity(1); // Reset quantity after adding
   };
@@ -33,6 +61,24 @@ export default function ProductPage() {
       return () => clearTimeout(timer);
     }
   }, [showNotification]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#EDEDE6]">
+        <header className="bg-[#EDEDE6] border-b border-stone-900 px-4 py-4 md:px-8 animate-pulse">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
+              <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
+              <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
+            </div>
+          </div>
+        </header>
+        <SkeletonProductDetail />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#EDEDE6]">
@@ -108,7 +154,7 @@ export default function ProductPage() {
                 {product.name}
               </h1>
               <p className="text-3xl md:text-4xl font-light text-stone-800">
-                ₱{product.price}
+                ₱{currentPrice.toFixed(2)}
               </p>
             </div>
 
@@ -117,6 +163,33 @@ export default function ProductPage() {
                 {product.description}
               </p>
             </div>
+
+            {/* Size Selector */}
+            {product.hasSizes && product.sizes && product.sizes.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-3">
+                  Select Size
+                </label>
+                <div className="flex flex-wrap gap-3">
+                  {product.sizes.map((size) => (
+                    <button
+                      key={size.name}
+                      onClick={() => handleSizeChange(size.name)}
+                      className={`px-6 py-3 rounded-lg border-2 transition-all duration-200 ${
+                        selectedSize === size.name
+                          ? 'bg-stone-900 text-white border-stone-900'
+                          : 'bg-white text-stone-900 border-stone-300 hover:border-stone-900'
+                      }`}
+                    >
+                      <div className="flex flex-col items-center">
+                        <span className="font-medium">{size.name}</span>
+                        <span className="text-sm">₱{size.price.toFixed(2)}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Quantity Selector */}
             <div>

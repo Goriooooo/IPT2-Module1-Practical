@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
+import Navigation from '../components/Navigation'
+import Swal from 'sweetalert2'
 
 function Contact() {
   const [formData, setFormData] = useState({
@@ -15,11 +17,17 @@ function Contact() {
     })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     // Handle form submission here
     console.log('Form submitted:', formData)
-    alert('Thank you for your message! We\'ll get back to you soon.')
+    await Swal.fire({
+      title: 'Thank You!',
+      text: 'Thank you for your message! We\'ll get back to you soon.',
+      icon: 'success',
+      confirmButtonColor: '#78350f',
+      timer: 3000
+    })
     setFormData({ name: '', email: '', subject: '', message: '' })
   }
 

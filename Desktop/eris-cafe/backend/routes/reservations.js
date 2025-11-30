@@ -1,5 +1,6 @@
 import express from 'express';
 import Reservation from '../models/reservation.model.js';
+import Notification from '../models/notification.model.js';
 import { authMiddleware } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -39,22 +40,57 @@ router.get('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-// Create new reservation
+// Create new reservation with concurrency control
 router.post('/create', authMiddleware, async (req, res) => {
+  const session = await Reservation.startSession();
+  session.startTransaction();
+  
   try {
-    const { customerInfo, date, time, guests, specialRequests } = req.body;
+    const { customerInfo, date, time, guests, specialRequests, tableId } = req.body;
 
     // Validate required fields
     if (!customerInfo || !date || !time || !guests) {
+      await session.abortTransaction();
       return res.status(400).json({ 
         success: false, 
         message: 'Missing required fields' 
       });
     }
 
+    // Normalize date and time for comparison
+    const reservationDate = new Date(date);
+    reservationDate.setHours(0, 0, 0, 0);
+
+    // Check for existing confirmed reservation at the same table, date, and time
+    if (tableId) {
+      const existingReservation = await Reservation.findOne({
+        tableId: tableId,
+        date: {
+          $gte: reservationDate,
+          $lt: new Date(reservationDate.getTime() + 24 * 60 * 60 * 1000)
+        },
+        time: time,
+        status: { $in: ['pending', 'confirmed'] } // Check both pending and confirmed
+      }).session(session);
+
+      if (existingReservation) {
+        await session.abortTransaction();
+        return res.status(409).json({ 
+          success: false, 
+          message: `Table ${tableId} is already reserved for ${time} on ${reservationDate.toLocaleDateString()}. Please select a different table or time.`,
+          conflictingReservation: {
+            reservationId: existingReservation.reservationId,
+            status: existingReservation.status,
+            time: existingReservation.time
+          }
+        });
+      }
+    }
+
     // Generate unique reservation ID
     const reservationId = `RES-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
 
+    // Create reservation within transaction
     const reservation = new Reservation({
       reservationId,
       userId: req.user.id,
@@ -63,23 +99,39 @@ router.post('/create', authMiddleware, async (req, res) => {
         email: customerInfo.email,
         phone: customerInfo.phone
       },
-      date: new Date(date),
+      date: reservationDate,
       time,
       guests,
+      tableId: tableId || null,
       specialRequests,
-      status: 'confirmed'
+      status: 'pending'
     });
 
-    await reservation.save();
+    await reservation.save({ session });
+
+    // Commit transaction
+    await session.commitTransaction();
 
     res.status(201).json({ 
       success: true, 
-      message: 'Reservation created successfully',
+      message: 'Reservation created successfully. Awaiting admin confirmation.',
       data: reservation 
     });
   } catch (error) {
+    await session.abortTransaction();
     console.error('Create reservation error:', error);
+    
+    // Handle duplicate key errors
+    if (error.code === 11000) {
+      return res.status(409).json({ 
+        success: false, 
+        message: 'A conflicting reservation already exists. Please try again.' 
+      });
+    }
+    
     res.status(500).json({ success: false, error: error.message });
+  } finally {
+    session.endSession();
   }
 });
 
@@ -149,41 +201,112 @@ router.delete('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-// Admin: Update reservation status
+// Admin: Update reservation status with conflict detection
 router.patch('/:id/status', authMiddleware, async (req, res) => {
+  const session = await Reservation.startSession();
+  session.startTransaction();
+  
   try {
     const { status } = req.body;
 
-    if (!['confirmed', 'pending', 'cancelled'].includes(status)) {
+    if (!['confirmed', 'pending', 'cancelled', 'completed', 'no-show'].includes(status)) {
+      await session.abortTransaction();
       return res.status(400).json({ 
         success: false, 
         message: 'Invalid status' 
       });
     }
 
-    const reservation = await Reservation.findById(req.params.id);
+    const reservation = await Reservation.findById(req.params.id).session(session);
 
     if (!reservation) {
+      await session.abortTransaction();
       return res.status(404).json({ 
         success: false, 
         message: 'Reservation not found' 
       });
     }
 
+    // If confirming, check for conflicts with other confirmed reservations
+    if (status === 'confirmed' && reservation.tableId) {
+      const reservationDate = new Date(reservation.date);
+      reservationDate.setHours(0, 0, 0, 0);
+
+      const conflictingReservation = await Reservation.findOne({
+        _id: { $ne: req.params.id }, // Exclude current reservation
+        tableId: reservation.tableId,
+        date: {
+          $gte: reservationDate,
+          $lt: new Date(reservationDate.getTime() + 24 * 60 * 60 * 1000)
+        },
+        time: reservation.time,
+        status: 'confirmed'
+      }).session(session);
+
+      if (conflictingReservation) {
+        await session.abortTransaction();
+        return res.status(409).json({ 
+          success: false, 
+          message: `Cannot confirm: Table ${reservation.tableId} is already confirmed for another reservation at ${reservation.time}.`,
+          conflictingReservation: {
+            reservationId: conflictingReservation.reservationId,
+            customerName: conflictingReservation.customerInfo?.name
+          }
+        });
+      }
+    }
+
+    // Update status
+    const oldStatus = reservation.status;
     reservation.status = status;
     if (status === 'cancelled') {
       reservation.cancelledAt = new Date();
     }
-    await reservation.save();
+    
+    await reservation.save({ session });
+
+    // Create notification for user if status changed
+    if (oldStatus !== status) {
+      const statusMessages = {
+        pending: 'is pending confirmation',
+        confirmed: 'has been confirmed! ✅',
+        cancelled: 'has been cancelled ❌',
+        completed: 'has been completed! 🎉',
+        'no-show': 'was marked as no-show'
+      };
+
+      await Notification.create([{
+        userId: reservation.userId,
+        type: 'reservation',
+        referenceId: reservation._id,
+        referenceNumber: reservation.reservationId,
+        title: `Reservation #${reservation.reservationId} Status Update`,
+        message: `Your reservation ${statusMessages[status] || 'status has been updated'}`,
+        status: status
+      }], { session });
+    }
+
+    await session.commitTransaction();
 
     res.json({ 
       success: true, 
-      message: 'Reservation status updated',
+      message: 'Reservation status updated successfully',
       data: reservation 
     });
   } catch (error) {
+    await session.abortTransaction();
     console.error('Update reservation status error:', error);
+    
+    if (error.name === 'VersionError') {
+      return res.status(409).json({ 
+        success: false, 
+        message: 'This reservation was modified by another admin. Please refresh and try again.' 
+      });
+    }
+    
     res.status(500).json({ success: false, error: error.message });
+  } finally {
+    session.endSession();
   }
 });
 

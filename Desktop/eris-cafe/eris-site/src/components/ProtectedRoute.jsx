@@ -1,50 +1,30 @@
-import { Navigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import AdminLoginModal from './AdminLoginModal';
 
 const ProtectedRoute = ({ children, requireAdmin = false }) => {
-  const { isAuthenticated, isAdmin, userData } = useAuth();
-  const [showLoginModal, setShowLoginModal] = useState(false);
+  const { isAuthenticated, isAdmin, loading } = useAuth();
+  const location = useLocation();
 
-  useEffect(() => {
-    // Show login modal for admin routes if not authenticated
-    if (requireAdmin && !isAuthenticated) {
-      setShowLoginModal(true);
-    }
-  }, [requireAdmin, isAuthenticated]);
-
-  // For admin routes, show login modal if not authenticated
-  if (requireAdmin && !isAuthenticated) {
+  // Show loading spinner while checking authentication
+  if (loading) {
     return (
-      <>
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-          <div className="text-center max-w-md p-8">
-            <div className="text-6xl mb-4">🔐</div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Admin Login Required</h2>
-            <p className="text-gray-600 mb-6">Please sign in with your admin credentials to continue.</p>
-            <button
-              onClick={() => setShowLoginModal(true)}
-              className="px-6 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-semibold"
-            >
-              Sign In as Admin
-            </button>
-          </div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
         </div>
-        <AdminLoginModal
-          isOpen={showLoginModal}
-          onClose={() => {
-            setShowLoginModal(false);
-            window.history.back();
-          }}
-        />
-      </>
+      </div>
     );
   }
 
-  // For regular protected routes, redirect to home
+  // For admin routes, redirect to admin login if not authenticated
+  if (requireAdmin && !isAuthenticated) {
+    return <Navigate to="/admin/login" state={{ from: location }} replace />;
+  }
+
+  // For regular protected routes, redirect to customer login
   if (!requireAdmin && !isAuthenticated) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   // Check if authenticated user has admin role for admin routes

@@ -19,8 +19,9 @@ const AdminLoginModal = ({ isOpen, onClose }) => {
       const result = await manualLogin(email, password);
 
       if (result.success) {
-        // Check if user has admin role
-        if (result.user.role !== 'admin') {
+        // Check if user has admin, staff, or owner role
+        const allowedRoles = ['admin', 'staff', 'owner'];
+        if (!allowedRoles.includes(result.user.role)) {
           setError('Access denied. Admin privileges required.');
           setLoading(false);
           return;
@@ -34,7 +35,8 @@ const AdminLoginModal = ({ isOpen, onClose }) => {
       } else {
         setError(result.message || 'Invalid admin credentials');
       }
-    } catch (err) {
+    } catch (error) {
+      console.error('Login error:', error);
       setError('An error occurred during login');
     } finally {
       setLoading(false);
@@ -123,7 +125,7 @@ const AdminLoginModal = ({ isOpen, onClose }) => {
         {/* Demo Credentials */}
         <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-xs text-blue-800 text-center font-medium">
-            Demo Credentials: admin@eriscafe.com / admin123
+            Not an admin? <a><strong>Login as Customer</strong></a>
           </p>
         </div>
       </div>

@@ -16,6 +16,9 @@ export default {
         coffee: "#6B4E3D",     // Coffee Brown
         olive: "#5C6652",      // Muted Olive Green
       },
+      animation: {
+        'spin-slow': 'spin 120s linear infinite',
+      },
     },
   },
   plugins: [],

@@ -44,8 +44,8 @@ const reservationSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['confirmed', 'cancelled', 'completed', 'no-show'],
-    default: 'confirmed'
+    enum: ['pending', 'confirmed', 'cancelled', 'completed', 'no-show'],
+    default: 'pending'
   },
   specialRequests: {
     type: String
@@ -54,13 +54,17 @@ const reservationSchema = new mongoose.Schema({
     type: Date
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  optimisticConcurrency: true // Enable version key for concurrency control
 });
 
-// Indexes
+// Indexes for performance
 reservationSchema.index({ userId: 1, date: -1 });
 reservationSchema.index({ reservationId: 1 });
 reservationSchema.index({ date: 1, status: 1 });
+
+// Compound index for conflict detection
+reservationSchema.index({ tableId: 1, date: 1, time: 1, status: 1 });
 
 const Reservation = mongoose.model('Reservation', reservationSchema);
 

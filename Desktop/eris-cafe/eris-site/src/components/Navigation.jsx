@@ -7,9 +7,9 @@ function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   const navItems = [
-    { name: 'Cart', path: '/menu' },
-    { name: 'Profile', path: '/about' },
-    { name: 'Next Page', path: '/contact' }
+    { name: 'Cart', path: '/cart' },
+    { name: 'Shop', path: '/category1' },
+    { name: 'Tables', path: '/reservation' }
   ]
 
   const isActive = (path) => {

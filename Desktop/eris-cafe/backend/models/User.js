@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema({
     password: { type: String }, // For manual login, not required for Google OAuth
     role: { 
         type: String, 
-        enum: ['customer', 'admin'], 
+        enum: ['customer', 'admin', 'staff', 'owner'], 
         default: 'customer',
         required: true 
     },

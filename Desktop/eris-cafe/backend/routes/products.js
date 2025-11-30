@@ -3,11 +3,16 @@ import Product from '../models/product.model.js';
 
 const router = express.Router();
 
-// Get all products
+// Get all products (excluding archived by default)
 router.get('/', async (req, res) => {
   try {
-    const { category, featured, search } = req.query;
+    const { category, featured, search, includeArchived } = req.query;
     let query = {};
+    
+    // By default, exclude archived products unless explicitly requested
+    if (includeArchived !== 'true') {
+      query.isArchived = { $ne: true };
+    }
     
     if (category) {
       query.category = category;
@@ -25,6 +30,17 @@ router.get('/', async (req, res) => {
     res.json({ success: true, data: products });
   } catch (error) {
     console.error('Get products error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get archived products only
+router.get('/archived/all', async (req, res) => {
+  try {
+    const products = await Product.find({ isArchived: true }).sort({ archivedAt: -1 });
+    res.json({ success: true, data: products });
+  } catch (error) {
+    console.error('Get archived products error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -98,7 +114,57 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Delete product (Admin only)
+// Archive product (Admin only)
+router.patch('/:id/archive', async (req, res) => {
+  try {
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      { 
+        isArchived: true,
+        archivedAt: new Date(),
+        isAvailable: false
+      },
+      { new: true }
+    );
+    
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+    
+    console.log('Product archived:', product.name);
+    res.json({ success: true, data: product, message: 'Product archived successfully' });
+  } catch (error) {
+    console.error('Archive product error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Unarchive/Restore product (Admin only)
+router.patch('/:id/unarchive', async (req, res) => {
+  try {
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      { 
+        isArchived: false,
+        archivedAt: null,
+        isAvailable: true
+      },
+      { new: true }
+    );
+    
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+    
+    console.log('Product restored:', product.name);
+    res.json({ success: true, data: product, message: 'Product restored successfully' });
+  } catch (error) {
+    console.error('Restore product error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Delete product permanently (Admin only) - Keep for permanent deletion if needed
 router.delete('/:id', async (req, res) => {
   try {
     const product = await Product.findByIdAndDelete(req.params.id);
@@ -107,8 +173,8 @@ router.delete('/:id', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Product not found' });
     }
     
-    console.log('Product deleted:', product.name);
-    res.json({ success: true, message: 'Product deleted successfully' });
+    console.log('Product deleted permanently:', product.name);
+    res.json({ success: true, message: 'Product deleted permanently' });
   } catch (error) {
     console.error('Delete product error:', error);
     res.status(500).json({ success: false, error: error.message });

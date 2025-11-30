@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 import Navigation from '../components/Navigation';
+import { SkeletonForm, SkeletonOrderCard } from '../components/SkeletonLoaders';
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -15,8 +17,8 @@ const Checkout = () => {
   
   const [formData, setFormData] = useState({
     phoneNumber: '',
-    paymentMethod: 'cash',
-    notes: ''
+    deliveryAddress: 'Pickup at Eris Cafe',
+    paymentMethod: 'cash'
   });
 
   // Calculate total amount from cartItems
@@ -44,10 +46,10 @@ const Checkout = () => {
       return false;
     }
 
-    // Check 2: User must be a customer (not admin)
-    if (userData?.role === 'admin') {
-      console.log('FAILED: User is admin');
-      setError('Admins cannot place orders. Please login with a customer account.');
+    // Check 2: User must be a customer (not admin, staff, or owner)
+    if (userData?.role !== 'customer') {
+      console.log('FAILED: User is not a customer');
+      setError('Only customers can place orders. Please login with a customer account.');
       return false;
     }
 
@@ -117,26 +119,38 @@ const Checkout = () => {
 
     try {
       const orderData = {
-        items: cartItems.map(item => ({
-          productId: item._id || item.id,
-          name: item.name,
-          quantity: item.quantity,
-          price: item.price,
-          size: item.size || 'Regular',
-          temperature: item.temperature || 'Hot'
-        })),
+        items: cartItems.map(item => {
+          // Ensure we use the MongoDB _id as productId
+          const productId = item.productId || item._id || item.id;
+          console.log('Item mapping:', { 
+            name: item.name, 
+            productId, 
+            _id: item._id, 
+            id: item.id,
+            fullItem: item 
+          });
+          
+          return {
+            productId: productId,
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+            size: item.size || 'Regular',
+            temperature: item.temperature || 'Hot',
+            image: item.image || item.imageUrl || ''
+          };
+        }),
         totalPrice: totalAmount,
+        deliveryAddress: formData.deliveryAddress,
+        paymentMethod: formData.paymentMethod,
         customerInfo: {
           name: userData?.name || '',
           email: userData?.email || '',
-          phone: formData.phoneNumber,
-          address: 'Pickup at Eris Cafe'
-        },
-        paymentMethod: formData.paymentMethod,
-        notes: formData.notes
+          phone: formData.phoneNumber
+        }
       };
 
-      console.log('Sending order data:', orderData);
+      console.log('Sending order data:', JSON.stringify(orderData, null, 2));
 
       const response = await axios.post(
         'http://localhost:4000/api/orders/create',
@@ -172,7 +186,12 @@ const Checkout = () => {
       
       const errorMessage = err.response?.data?.message || err.message || 'Failed to place order. Please try again.';
       setError(errorMessage);
-      alert(`Order failed: ${errorMessage}`); // Show alert for visibility
+      await Swal.fire({
+        title: 'Order Failed',
+        text: errorMessage,
+        icon: 'error',
+        confirmButtonColor: '#78350f'
+      });
     } finally {
       setLoading(false);
       console.log('=== CHECKOUT COMPLETE ===');
@@ -206,10 +225,17 @@ const Checkout = () => {
     return (
       <div className="min-h-screen bg-[#EDEDE6]">
         <Navigation />
-        <div className="flex justify-center items-center h-[70vh]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-amber-950 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading cart...</p>
+        <div className="container mx-auto px-4 py-12">
+          <div className="h-8 bg-gray-300 rounded w-48 mx-auto mb-8 animate-pulse"></div>
+          <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-8">
+            <div className="space-y-4">
+              <SkeletonOrderCard />
+              <SkeletonOrderCard />
+            </div>
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <div className="h-6 bg-gray-300 rounded w-48 mb-4 animate-pulse"></div>
+              <SkeletonForm fields={3} />
+            </div>
           </div>
         </div>
       </div>
@@ -237,12 +263,28 @@ const Checkout = () => {
             <div className="space-y-4 mb-6">
               {cartItems && cartItems.length > 0 ? (
                 cartItems.map((item) => (
-                  <div key={item._id || item.id} className="flex justify-between items-center border-b pb-3">
+                  <div key={item._id || item.id} className="flex gap-4 items-start border-b pb-3">
+                    {/* Product Image */}
+                    {(item.image || item.imageUrl) && (
+                      <img 
+                        src={item.image || item.imageUrl} 
+                        alt={item.name}
+                        className="w-16 h-16 object-cover rounded-lg"
+                      />
+                    )}
+                    
+                    {/* Product Details */}
                     <div className="flex-1">
                       <p className="font-semibold">{item.name}</p>
-                      <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
+                      <div className="text-sm text-gray-600 space-y-1">
+                        {item.size && <p>Size: {item.size}</p>}
+                        {item.temperature && <p>Temp: {item.temperature}</p>}
+                        <p>Qty: {item.quantity} × ₱{item.price.toFixed(2)}</p>
+                      </div>
                     </div>
-                    <p className="font-semibold">₱{(item.price * item.quantity).toFixed(2)}</p>
+                    
+                    {/* Price */}
+                    <p className="font-semibold text-amber-950">₱{(item.price * item.quantity).toFixed(2)}</p>
                   </div>
                 ))
               ) : (
@@ -260,21 +302,12 @@ const Checkout = () => {
 
           {/* Checkout Form */}
           <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-2xl font-playfair mb-4">Delivery Information</h2>
-            
-            {/* Debug Info */}
-            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded text-xs">
-              <p><strong>Debug:</strong></p>
-              <p>Authenticated: {isAuthenticated ? 'Yes' : 'No'}</p>
-              <p>User: {userData?.name || 'N/A'}</p>
-              <p>Cart Items: {cartItems?.length || 0}</p>
-              <p>Total: ${(totalAmount || 0).toFixed(2)}</p>
-            </div>
+            <h2 className="text-2xl font-playfair mb-4">Customer Information</h2>
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold mb-2">
-                  Full Name <span className="text-red-600">*</span>
+                  Full Name
                 </label>
                 <input
                   type="text"
@@ -286,7 +319,7 @@ const Checkout = () => {
 
               <div>
                 <label className="block text-sm font-semibold mb-2">
-                  Email <span className="text-red-600">*</span>
+                  Email
                 </label>
                 <input
                   type="email"
@@ -311,59 +344,10 @@ const Checkout = () => {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold mb-2">
-                  Delivery Address <span className="text-red-600">*</span>
-                </label>
-                <textarea
-                  name="deliveryAddress"
-                  value={formData.deliveryAddress}
-                  onChange={handleChange}
-                  required
-                  rows="3"
-                  placeholder="Enter your complete delivery address"
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-amber-950"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold mb-2">
-                  Payment Method <span className="text-red-600">*</span>
-                </label>
-                <select
-                  name="paymentMethod"
-                  value={formData.paymentMethod}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-amber-950"
-                >
-                  <option value="cash">Cash on Delivery</option>
-                  <option value="gcash">GCash</option>
-                  <option value="card">Credit/Debit Card</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold mb-2">
-                  Order Notes (Optional)
-                </label>
-                <textarea
-                  name="notes"
-                  value={formData.notes}
-                  onChange={handleChange}
-                  rows="2"
-                  placeholder="Any special instructions?"
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-amber-950"
-                />
-              </div>
-
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || !cartItems || cartItems.length === 0}
                 className="w-full py-3 bg-amber-950 text-white rounded-lg font-semibold hover:bg-amber-900 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                onClick={() => {
-                  console.log('Button clicked!');
-                  // The form submit will handle the rest
-                }}
               >
                 {loading ? (
                   <span className="flex items-center justify-center">

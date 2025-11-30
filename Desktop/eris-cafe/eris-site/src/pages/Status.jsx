@@ -3,14 +3,49 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Clock, ChefHat, Package, CheckCircle } from 'lucide-react';
 import Navigation from '../components/Navigation';
 import axios from 'axios';
+import Swal from 'sweetalert2';
+import { SkeletonOrderCard } from '../components/SkeletonLoaders';
 
 export default function Status() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { orderId, status: initialStatus, orderData } = location.state || {};
+  const { orderId, status: initialStatus, orderData: initialOrderData } = location.state || {};
   
   const [currentStatus, setCurrentStatus] = useState(initialStatus?.toUpperCase() || 'PENDING');
-  const [cancelRequested, setCancelRequested] = useState(orderData?.cancelRequested || false);
+  const [orderData, setOrderData] = useState(initialOrderData);
+  const [cancelRequested, setCancelRequested] = useState(initialOrderData?.cancelRequested || false);
+  const [loading, setLoading] = useState(false);
+  
+  // Fetch order status from backend
+  const fetchOrderStatus = async () => {
+    if (!orderData?._id) return;
+    
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('appToken');
+      const response = await axios.get(
+        `http://localhost:4000/api/orders/my-orders`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      
+      // Find the current order from the list
+      const updatedOrder = response.data.data.find(order => order._id === orderData._id);
+      
+      if (updatedOrder) {
+        setCurrentStatus(updatedOrder.status.toUpperCase());
+        setCancelRequested(updatedOrder.cancelRequested || false);
+        setOrderData(updatedOrder);
+      }
+    } catch (error) {
+      console.error('Error fetching order status:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
   
   // Redirect if no order data
   useEffect(() => {
@@ -20,8 +55,35 @@ export default function Status() {
     }
   }, [orderId, navigate]);
 
+  // Poll for status updates every 10 seconds
+  useEffect(() => {
+    if (!orderData?._id) return;
+    
+    // Fetch immediately on mount
+    fetchOrderStatus();
+    
+    // Set up polling interval
+    const interval = setInterval(() => {
+      fetchOrderStatus();
+    }, 10000); // Poll every 10 seconds
+    
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orderData?._id]);
+
   const handleRequestCancellation = async () => {
-    if (window.confirm('Are you sure you want to request cancellation for this order? An admin will review your request.')) {
+    const result = await Swal.fire({
+      title: 'Request Cancellation?',
+      text: 'Are you sure you want to request cancellation for this order? An admin will review your request.',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#F59E0B',
+      cancelButtonColor: '#6B7280',
+      confirmButtonText: 'Yes, request cancellation',
+      cancelButtonText: 'No, keep order'
+    });
+
+    if (result.isConfirmed) {
       try {
         const token = localStorage.getItem('appToken');
         const response = await axios.post(
@@ -35,12 +97,23 @@ export default function Status() {
         );
         
         if (response.data.success) {
-          alert('Cancellation request sent successfully. An admin will review your request.');
+          await Swal.fire({
+            title: 'Request Sent!',
+            text: 'Cancellation request sent successfully. An admin will review your request.',
+            icon: 'success',
+            confirmButtonColor: '#78350f',
+            timer: 3000
+          });
           setCancelRequested(true);
         }
       } catch (error) {
         console.error('Error requesting cancellation:', error);
-        alert(error.response?.data?.message || 'Failed to send cancellation request');
+        await Swal.fire({
+          title: 'Request Failed',
+          text: error.response?.data?.message || 'Failed to send cancellation request',
+          icon: 'error',
+          confirmButtonColor: '#78350f'
+        });
       }
     }
   };
@@ -107,13 +180,79 @@ export default function Status() {
           <div className="text-center mb-12">
             <h1 className="text-5xl font-serif font-bold mb-4">Order Status</h1>
             {orderId && (
-              <div className="bg-white rounded-lg shadow-md p-6 inline-block">
-                <p className="text-sm text-gray-600 mb-1">Order ID</p>
-                <p className="text-2xl font-bold text-amber-900">{orderId}</p>
-                {orderData && (
-                  <div className="mt-4 text-left">
-                    <p className="text-sm text-gray-600">Total Amount</p>
-                    <p className="text-xl font-semibold">${orderData.totalPrice?.toFixed(2)}</p>
+              <div className="bg-white rounded-lg shadow-md p-6 w-full max-w-3xl mx-auto">
+                <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-6">
+                  {/* Order ID Section */}
+                  <div className="text-center md:text-left">
+                    <p className="text-sm text-gray-600 mb-1">Order ID</p>
+                    <p className="text-2xl font-bold text-amber-900">{orderId}</p>
+                  </div>
+
+                  {/* Order Details */}
+                  {orderData && (
+                    <>
+                      {/* Customer Information */}
+                      <div className="text-center md:text-left">
+                        <p className="text-sm text-gray-600 mb-1">Customer Name</p>
+                        <p className="text-lg font-semibold">{orderData.customerInfo?.name || 'N/A'}</p>
+                      </div>
+
+                      {/* Payment Method */}
+                      <div className="text-center md:text-left">
+                        <p className="text-sm text-gray-600 mb-1">Payment Method</p>
+                        <p className="text-lg font-semibold">Cash on Pickup</p>
+                      </div>
+
+                      {/* Total Amount */}
+                      <div className="text-center md:text-left">
+                        <p className="text-sm text-gray-600 mb-1">Total Amount</p>
+                        <p className="text-xl font-bold text-amber-900">₱{orderData.totalPrice?.toFixed(2)}</p>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* Order Items */}
+                {orderData?.items && orderData.items.length > 0 && (
+                  <div className="mt-6 pt-6 border-t border-gray-200">
+                    <p className="text-sm font-semibold text-gray-700 mb-3">Order Items:</p>
+                    <div className="space-y-2">
+                      {orderData.items.map((item, index) => (
+                        <div key={index} className="flex justify-between items-center text-sm bg-gray-50 p-3 rounded">
+                          <div className="flex items-center gap-3">
+                            {item.image && (
+                              <img 
+                                src={item.image} 
+                                alt={item.name}
+                                className="w-12 h-12 object-cover rounded"
+                              />
+                            )}
+                            <div>
+                              <p className="font-medium">{item.name}</p>
+                              {item.size && <p className="text-gray-500 text-xs">Size: {item.size}</p>}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-gray-600">Qty: {item.quantity}</p>
+                            <p className="font-semibold">₱{(item.price * item.quantity).toFixed(2)}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Order Date */}
+                {orderData?.createdAt && (
+                  <div className="mt-4 pt-4 border-t border-gray-200 text-center md:text-left">
+                    <p className="text-sm text-gray-600">Order Date</p>
+                    <p className="text-sm font-medium">{new Date(orderData.createdAt).toLocaleString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}</p>
                   </div>
                 )}
               </div>
@@ -188,11 +327,25 @@ export default function Status() {
             {currentStatus !== 'COMPLETED' && (
               <div className="mt-6">
                 <button
-                  onClick={() => window.location.reload()}
-                  className="px-6 py-3 bg-amber-900 text-white rounded-lg hover:bg-amber-800 transition"
+                  onClick={fetchOrderStatus}
+                  disabled={loading}
+                  className="px-6 py-3 bg-amber-900 text-white rounded-lg hover:bg-amber-800 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mx-auto"
                 >
-                  Refresh Status
+                  {loading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Refreshing...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      Refresh Status
+                    </>
+                  )}
                 </button>
+                <p className="text-sm text-gray-500 mt-2">Auto-refreshes every 10 seconds</p>
               </div>
             )}
 
@@ -234,28 +387,6 @@ export default function Status() {
             </div>
           </div>
         </div>
-        
-        {/* Demo Control buttons - Remove in production */}
-        {import.meta.env.DEV && (
-          <div className="mt-12">
-            <p className="text-center text-sm text-gray-500 mb-4">Development Controls (Remove in production)</p>
-            <div className="flex justify-center gap-4">
-              {statuses.map((status) => (
-                <button
-                  key={status.id}
-                  onClick={() => setCurrentStatus(status.id)}
-                  className={`px-4 py-2 rounded-lg font-semibold transition-all ${
-                    currentStatus === status.id
-                      ? 'bg-amber-700 text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
-                >
-                  {status.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
     </div>

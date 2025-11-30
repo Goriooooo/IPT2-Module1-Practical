@@ -18,4 +18,10 @@ export default defineConfig({
       },
     },
   ],
+  server: {
+    allowedHosts: [
+      'eris-site.loca.lt',
+      '.loca.lt', // Allow all loca.lt subdomains
+    ],
+  },
 })

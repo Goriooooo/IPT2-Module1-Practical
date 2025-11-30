@@ -6,6 +6,7 @@ import crypto from 'crypto';
 import User from '../models/User.js';
 import axios from 'axios';
 import { sendPasswordResetEmail, sendPasswordChangeConfirmation } from '../utils/emailService.js';
+import { logLoginAttempt } from '../utils/loginLogger.js';
 
 const router = express.Router();
 
@@ -82,12 +83,29 @@ router.post('/google', async (req, res) => {
       { expiresIn: '1h' } // Token expires in 1 hour
     );
 
+    // Log successful login
+    await logLoginAttempt({
+      id: user._id,
+      email: user.email,
+      name: user.name,
+      role: user.role
+    }, 'success', req);
+
     // Send the appToken back to the frontend
     res.status(200).json({ appToken });
 
   } catch (error) {
     // Handle errors from either reCAPTCHA or Google Auth
     console.error('Authentication error:', error.message);
+    
+    // Log failed login attempt
+    const email = req.body.email || 'unknown@email.com';
+    await logLoginAttempt({
+      email,
+      name: 'Unknown User',
+      role: 'unknown'
+    }, 'failed', req, error.message);
+    
     res.status(401).json({ message: 'Authentication failed' });
   }
 });
@@ -168,17 +186,40 @@ router.post('/login', async (req, res) => {
     // Find user by email
     const user = await User.findOne({ email });
     if (!user) {
+      // Log failed login attempt
+      await logLoginAttempt({
+        email,
+        name: 'Unknown User',
+        role: 'unknown'
+      }, 'failed', req, 'User not found');
+      
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
     // Check if user has a password (not Google OAuth only user)
     if (!user.password) {
+      // Log failed login attempt
+      await logLoginAttempt({
+        id: user._id,
+        email: user.email,
+        name: user.name,
+        role: user.role
+      }, 'failed', req, 'No password set - Google OAuth user');
+      
       return res.status(401).json({ message: 'Please login with Google' });
     }
 
     // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
+      // Log failed login attempt
+      await logLoginAttempt({
+        id: user._id,
+        email: user.email,
+        name: user.name,
+        role: user.role
+      }, 'failed', req, 'Invalid password');
+      
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
@@ -194,6 +235,14 @@ router.post('/login', async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
+
+    // Log successful login
+    await logLoginAttempt({
+      id: user._id,
+      email: user.email,
+      name: user.name,
+      role: user.role
+    }, 'success', req);
 
     res.status(200).json({ 
       message: 'Login successful',

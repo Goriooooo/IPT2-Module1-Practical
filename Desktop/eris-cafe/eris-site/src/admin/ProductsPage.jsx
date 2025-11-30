@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Search, X } from 'lucide-react';
+import { Plus, Edit, Archive, Search, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import Swal from 'sweetalert2';
+import { SkeletonCard } from '../components/SkeletonLoaders';
 
 const ProductsPage = () => {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -18,12 +22,14 @@ const ProductsPage = () => {
     isAvailable: true
   });
   const [submitting, setSubmitting] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const categories = [
-    'Hot Espresso',
-    'Iced Espresso',
-    'Hot Non-Coffee',
-    'Iced Non-Coffee',
+    'Iced Espresso Series',
+    'Hot Espresso Series',
+    'Non-Coffee',
     'Pastries',
     'Desserts',
     'Other'
@@ -85,6 +91,8 @@ const ProductsPage = () => {
       stock: 0,
       isAvailable: true
     });
+    setSelectedFile(null);
+    setImagePreview(null);
   };
 
   // Handle form input changes
@@ -96,99 +104,247 @@ const ProductsPage = () => {
     }));
   };
 
+  // Handle file selection
+  const handleFileSelect = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      await Swal.fire({
+        title: 'Invalid File',
+        text: 'Please select an image file',
+        icon: 'warning',
+        confirmButtonColor: '#8B5CF6'
+      });
+      return;
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      await Swal.fire({
+        title: 'File Too Large',
+        text: 'Image size must be less than 5MB',
+        icon: 'warning',
+        confirmButtonColor: '#8B5CF6'
+      });
+      return;
+    }
+
+    setSelectedFile(file);
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Remove selected image
+  const handleRemoveImage = () => {
+    setSelectedFile(null);
+    setImagePreview(null);
+    setFormData(prev => ({ ...prev, image: '' }));
+  };
+
+  // Upload image to Cloudinary
+  const uploadImageToCloudinary = async () => {
+    if (!selectedFile) return formData.image;
+
+    setUploadingImage(true);
+    const uploadFormData = new FormData();
+    uploadFormData.append('image', selectedFile);
+
+    try {
+      const response = await axios.post(
+        'http://localhost:4000/api/upload/image',
+        uploadFormData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
+      return response.data.data.url;
+    } catch (error) {
+      console.error('Image upload error:', error);
+      throw new Error(error.response?.data?.message || 'Failed to upload image');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
   // Create or update product
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
 
     try {
+      // Upload image if a new file is selected
+      let imageUrl = formData.image;
+      if (selectedFile) {
+        imageUrl = await uploadImageToCloudinary();
+      }
+
+      const productData = {
+        ...formData,
+        image: imageUrl
+      };
+
       if (editingProduct) {
         // Update existing product
         const response = await axios.put(
           `http://localhost:4000/api/products/${editingProduct._id}`,
-          formData
+          productData
         );
         setProducts(products.map(p => 
           p._id === editingProduct._id ? response.data.data : p
         ));
-        alert('Product updated successfully!');
+        await Swal.fire({
+          title: 'Updated!',
+          text: 'Product updated successfully!',
+          icon: 'success',
+          confirmButtonColor: '#8B5CF6',
+          timer: 2000
+        });
       } else {
         // Create new product
         const response = await axios.post(
           'http://localhost:4000/api/products',
-          formData
+          productData
         );
         setProducts([response.data.data, ...products]);
-        alert('Product created successfully!');
+        await Swal.fire({
+          title: 'Created!',
+          text: 'Product created successfully!',
+          icon: 'success',
+          confirmButtonColor: '#8B5CF6',
+          timer: 2000
+        });
       }
       closeModal();
     } catch (error) {
       console.error('Error saving product:', error);
-      alert(error.response?.data?.message || 'Failed to save product');
+      await Swal.fire({
+        title: 'Save Failed',
+        text: error.response?.data?.message || error.message || 'Failed to save product',
+        icon: 'error',
+        confirmButtonColor: '#8B5CF6'
+      });
     } finally {
       setSubmitting(false);
     }
   };
 
-  // Delete product
-  const handleDelete = async (productId, productName) => {
-    if (!window.confirm(`Are you sure you want to delete "${productName}"?`)) {
+  // Archive product
+  const handleArchive = async (productId, productName) => {
+    const result = await Swal.fire({
+      title: 'Archive Product?',
+      text: `Are you sure you want to archive "${productName}"? It will be moved to the archive and hidden from active products.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#f59e0b',
+      cancelButtonColor: '#6B7280',
+      confirmButtonText: 'Yes, archive it!',
+      cancelButtonText: 'Cancel'
+    });
+
+    if (!result.isConfirmed) {
       return;
     }
-
+    
     try {
-      await axios.delete(`http://localhost:4000/api/products/${productId}`);
-      setProducts(products.filter(p => p._id !== productId));
-      alert('Product deleted successfully!');
+      await axios.patch(`http://localhost:4000/api/products/${productId}/archive`);
+      await fetchProducts();
+      await Swal.fire({
+        title: 'Archived!',
+        text: 'Product has been archived successfully!',
+        icon: 'success',
+        confirmButtonColor: '#8B5CF6',
+        timer: 2000
+      });
     } catch (error) {
-      console.error('Error deleting product:', error);
-      alert(error.response?.data?.message || 'Failed to delete product');
+      await Swal.fire({
+        title: 'Archive Failed',
+        text: error.response?.data?.message || 'Failed to archive product',
+        icon: 'error',
+        confirmButtonColor: '#8B5CF6'
+      });
     }
-  };
-
-  const filteredProducts = products.filter(product =>
+  };  const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mb-4"></div>
-          <p className="text-gray-600">Loading products...</p>
+      <div>
+        <div className='bg-gradient-to-bl from-[#2E1F1B] via-stone-700 to-[#5E4B43] px-4 md:px-8 pt-8 pb-8'>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5 animate-pulse">
+            <div className="h-12 bg-white/20 rounded w-80"></div>
+            <div className="flex gap-3">
+              <div className="h-12 bg-white/20 rounded w-32"></div>
+              <div className="h-12 bg-white/20 rounded w-48"></div>
+            </div>
+          </div>
+          <div className="flex gap-4">
+            <div className="h-10 bg-white/20 rounded flex-1"></div>
+            <div className="h-10 bg-white/20 rounded w-24"></div>
+          </div>
+        </div>
+        <div className="px-4 md:px-8 py-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {[...Array(8)].map((_, i) => <SkeletonCard key={i} />)}
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-2xl font-bold text-gray-800">Products Management</h1>
-        <button 
-          onClick={() => openModal()}
-          className="bg-coffee text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors flex items-center space-x-2"
-        >
-          <Plus size={20} />
-          <span>Add Product</span>
-        </button>
-      </div>
-
-      {/* Search Bar */}
-      <div className="bg-white rounded-lg shadow-md p-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-          <input
-            type="text"
-            placeholder="Search products by name or category..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-coffee"
-          />
+    <div>
+      {/* Gradient Header */}
+      <div className='bg-gradient-to-bl from-[#2E1F1B] via-stone-700 to-[#5E4B43] px-4 md:px-8 pt-8 pb-8'>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-[#EDEDE6]">Products Management</h1>
+          <div className="flex gap-3">
+            <button 
+              onClick={() => navigate('/admin/products/archived')}
+              className="bg-[#B0CE88] text-white px-6 py-3 rounded-lg hover:bg-stone-700 transition-colors flex items-center space-x-2 font-semibold shadow-lg"
+            >
+              <Archive size={20} />
+              <span>View Archive</span>
+            </button>
+            <button 
+              onClick={() => openModal()}
+              className="bg-white text-violet-600 px-6 py-3 rounded-lg hover:bg-gray-100 transition-colors flex items-center space-x-2 font-semibold shadow-lg"
+            >
+              <Plus size={20} />
+              <span>Add Product</span>
+            </button>
+          </div>
+        </div>
+        <div className="mt-5">
+           {/* Search Bar */}
+            <div className="bg-white/70 border border-white rounded-lg shadow-md p-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  type="text"
+                  placeholder="Search products by name or category..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-coffee"
+                />
+              </div>
+            </div>
         </div>
       </div>
+
+      <div className="px-4 md:px-8 py-6 space-y-6">
+
+     
 
       {/* Products Table */}
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -229,7 +385,7 @@ const ProductsPage = () => {
                       </div>
                     </td>
                     <td className="py-3 px-4 text-sm text-gray-600">{product.category}</td>
-                    <td className="py-3 px-4 text-sm font-medium text-gray-800">${product.price.toFixed(2)}</td>
+                    <td className="py-3 px-4 text-sm font-medium text-gray-800">₱{product.price.toFixed(2)}</td>
                     <td className="py-3 px-4">
                       <span className={`
                         px-2 py-1 text-xs font-semibold rounded-full
@@ -258,11 +414,11 @@ const ProductsPage = () => {
                           <Edit size={18} />
                         </button>
                         <button 
-                          onClick={() => handleDelete(product._id, product.name)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Delete product"
+                          onClick={() => handleArchive(product._id, product.name)}
+                          className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                          title="Archive product"
                         >
-                          <Trash2 size={18} />
+                          <Archive size={18} />
                         </button>
                       </div>
                     </td>
@@ -310,7 +466,7 @@ const ProductsPage = () => {
               {/* Price */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Price ($) *
+                  Price (₱) *
                 </label>
                 <input
                   type="number"
@@ -376,19 +532,65 @@ const ProductsPage = () => {
                 />
               </div>
 
-              {/* Image URL */}
+              {/* Image Upload */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Image URL
+                  Product Image
                 </label>
-                <input
-                  type="text"
-                  name="image"
-                  value={formData.image}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600"
-                  placeholder="https://example.com/image.jpg"
-                />
+                
+                {/* Image Preview */}
+                {(imagePreview || formData.image) && (
+                  <div className="mb-3 relative inline-block">
+                    <img
+                      src={imagePreview || formData.image}
+                      alt="Preview"
+                      className="w-32 h-32 object-cover rounded-lg border-2 border-gray-300"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                )}
+
+                {/* File Input */}
+                <div className="flex items-center gap-3">
+                  <label className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg cursor-pointer transition-colors">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span className="text-sm font-medium">Choose Image</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                    />
+                  </label>
+                  {selectedFile && (
+                    <span className="text-sm text-gray-600">
+                      {selectedFile.name}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  Max file size: 5MB. Supported formats: JPG, PNG, GIF, WebP
+                </p>
+
+                {/* Manual URL Input (Optional) */}
+                <div className="mt-3">
+                  <input
+                    type="text"
+                    name="image"
+                    value={formData.image}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600 text-sm"
+                    placeholder="Or paste image URL..."
+                  />
+                </div>
               </div>
 
               {/* Availability */}
@@ -416,16 +618,17 @@ const ProductsPage = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={submitting}
+                  disabled={submitting || uploadingImage}
                   className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
-                  {submitting ? 'Saving...' : editingProduct ? 'Update Product' : 'Create Product'}
+                  {uploadingImage ? 'Uploading Image...' : submitting ? 'Saving...' : editingProduct ? 'Update Product' : 'Create Product'}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

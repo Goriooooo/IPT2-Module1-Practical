@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Navigation from '../components/Navigation';
+import { motion } from 'framer-motion';
 import axios from 'axios';
+import Swal from 'sweetalert2';
+import { SkeletonReservation } from '../components/SkeletonLoaders';
 
 const Booking = () => {
   const { isAuthenticated } = useAuth();
@@ -51,7 +54,18 @@ const Booking = () => {
   };
 
   const handleCancelReservation = async (reservationId) => {
-    if (!window.confirm('Are you sure you want to cancel this reservation?')) {
+    const result = await Swal.fire({
+      title: 'Cancel Reservation?',
+      text: 'Are you sure you want to cancel this reservation?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#EF4444',
+      cancelButtonColor: '#6B7280',
+      confirmButtonText: 'Yes, cancel it',
+      cancelButtonText: 'No, keep it'
+    });
+
+    if (!result.isConfirmed) {
       return;
     }
 
@@ -68,12 +82,23 @@ const Booking = () => {
       );
 
       if (response.data.success) {
-        alert('Reservation cancelled successfully');
+        await Swal.fire({
+          title: 'Cancelled!',
+          text: 'Reservation cancelled successfully',
+          icon: 'success',
+          confirmButtonColor: '#78350f',
+          timer: 2000
+        });
         fetchReservations();
       }
     } catch (error) {
       console.error('Error cancelling reservation:', error);
-      alert(error.response?.data?.message || 'Failed to cancel reservation');
+      await Swal.fire({
+        title: 'Cancel Failed',
+        text: error.response?.data?.message || 'Failed to cancel reservation',
+        icon: 'error',
+        confirmButtonColor: '#78350f'
+      });
     }
   };
 
@@ -105,10 +130,16 @@ const Booking = () => {
     return (
       <div className="min-h-screen bg-[#EDEDE6]">
         <Navigation />
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading your reservations...</p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mb-8">
+            <div className="h-8 bg-gray-300 rounded w-64 mb-4 animate-pulse"></div>
+            <div className="h-10 bg-gray-200 rounded w-full mb-6 animate-pulse"></div>
+          </div>
+          <div className="space-y-4">
+            <SkeletonReservation />
+            <SkeletonReservation />
+            <SkeletonReservation />
+            <SkeletonReservation />
           </div>
         </div>
       </div>
@@ -116,7 +147,11 @@ const Booking = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#EDEDE6]">
+    <motion.div className="min-h-screen bg-[#EDEDE6]"
+      initial={{ width: 0}}
+      animate={{ width: "100%" }}
+      exit={{ x: window.innerWidth, transition: { duration: 0.3 } }}
+    >
       <Navigation />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -297,7 +332,7 @@ const Booking = () => {
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

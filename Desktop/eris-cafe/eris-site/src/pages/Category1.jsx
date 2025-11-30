@@ -2,34 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Navigation from '../components/Navigation';
-
+import { useCart } from '../context/CartContext';
+import { motion } from 'framer-motion';
+import { SkeletonProductGrid } from '../components/SkeletonLoaders';
 // Import local images as fallback
-import CL from '../assets/ICED SERIES/(ICED) Cafe Latte.png';
-import AM from '../assets/ICED SERIES/(ICED) Americano.png';
-import SC from '../assets/ICED SERIES/(ICED) Salted Caramel.png';
-import SL from '../assets/ICED SERIES/(ICED) Spanish Latte.png';
-import CM from '../assets/ICED SERIES/CARAMELMACCHIATO.png';
-import DM from '../assets/ICED SERIES/DIRTYMOCHA.png';
-import OAM from '../assets/ICED SERIES/ISORANGEAM.png';
-import WC from '../assets/ICED SERIES/WHIPPEDCOFFE.png';
+import IcedEspressoPlaceholder from '../assets/ICED SERIES/(ICED) Cafe Latte.png';
 
 const Category1 = () => {
   const navigate = useNavigate();
+  const { getTotalItems } = useCart();
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
-  // Mapping for local images
-  const imageMap = {
-    'Cafe Latte (ICED)': CL,
-    'Americano (ICED)': AM,
-    'Salted Caramel (ICED)': SC,
-    'Spanish Latte (ICED)': SL,
-    'Caramel Macchiato (ICED)': CM,
-    'Dirty Mocha (ICED)': DM,
-    'Orange Americano (ICED)': OAM,
-    'Whipped Coffee (ICED)': WC,
-  };
 
   useEffect(() => {
     fetchProducts();
@@ -40,7 +24,7 @@ const Category1 = () => {
       setLoading(true);
       setError('');
       
-      console.log('Fetching products from: http://localhost:4000/api/products');
+      console.log('Fetching products from API');
       
       // Temporarily fetch ALL products to debug
       const response = await axios.get('http://localhost:4000/api/products');
@@ -72,13 +56,14 @@ const Category1 = () => {
         return;
       }
       
-      // Map products and add local images
+      // Use Cloudinary images from ProductsPage, with local fallback
       const productsWithImages = icedProducts.map(product => ({
         ...product,
-        image: imageMap[product.name] || product.image,
-        category: product.category || 'Iced Espresso Series', // Add default category
-        stock: product.stock || 100, // Add default stock
-        isAvailable: product.isAvailable !== false // Default to true
+        // Prioritize Cloudinary image from database, fallback to placeholder
+        image: product.image || IcedEspressoPlaceholder,
+        category: product.category || 'Iced Espresso Series',
+        stock: product.stock || 100,
+        isAvailable: product.isAvailable !== false
       }));
       
       console.log('Products with images:', productsWithImages);
@@ -105,11 +90,10 @@ const Category1 = () => {
     return (
       <div className='bg-[#EDEDE6] min-h-screen'>
         <Navigation />
-        <div className="flex justify-center items-center h-[70vh]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-amber-950 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading products...</p>
-          </div>
+        <div className="container mx-auto px-8 py-12">
+          <div className="h-8 bg-gray-300 rounded w-64 mx-auto mb-2 animate-pulse"></div>
+          <div className="h-4 bg-gray-200 rounded w-48 mx-auto mb-8 animate-pulse"></div>
+          <SkeletonProductGrid items={8} />
         </div>
       </div>
     );
@@ -166,9 +150,52 @@ const Category1 = () => {
   }
 
   return (
-    <div className='bg-[#EDEDE6] min-h-screen'>
-      <Navigation />
-      
+    <motion.div className='bg-[#EDEDE6] min-h-screen'
+      initial={{ width: 0}}
+      animate={{ width: "100%" }}
+      exit={{ x: window.innerWidth, transition: { duration: 0.3 } }}
+    >
+
+       {/* Header */}
+      <header className="bg-[#EDEDE6] border-b border-stone-900 px-4 py-4 md:px-8">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <button className="p-2 hover:bg-stone-100 rounded-full transition"
+            onClick={() => navigate(-1)}
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+          </button>
+          <div className="flex items-center gap-4">
+            <button className="p-2 hover:bg-stone-100 rounded-full transition"
+              onClick={() => navigate('/orders')}
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </button>
+            <button 
+              onClick={() => navigate('/cart')}
+              className="p-2 hover:bg-stone-100 rounded-full transition relative"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              {getTotalItems() > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                  {getTotalItems()}
+                </span>
+              )}
+            </button>
+             <button className="p-2 hover:bg-stone-100 rounded-full transition"
+              onClick={() => navigate('/Category2')}
+             >
+              <p>Next Page</p>
+            </button>
+          </div>
+        </div>
+      </header>
+
       {/* Header */}
       <h1 className='font-playfair text-center mt-12 text-5xl'>Iced Espresso Series</h1>
       <p className='text-center text-gray-600 mt-2 mb-8'>{menuItems.length} Products Available</p>
@@ -196,12 +223,6 @@ const Category1 = () => {
                 }}
               />
               
-              {/* Category Badge */}
-              <div className="absolute top-4 left-4">
-                <span className="px-3 py-1 bg-amber-950 text-white text-xs font-semibold rounded-full">
-                  {item.category}
-                </span>
-              </div>
               
               {/* Stock Badge */}
               {!item.isAvailable && (
@@ -223,17 +244,27 @@ const Category1 = () => {
               
               <div className="flex justify-between items-center">
                 <span className="text-2xl font-bold text-amber-950">
-                  ₱{item.price.toFixed(2)}
+                  {item.hasSizes && item.sizes && item.sizes.length > 0 ? (
+                    `₱${Math.min(...item.sizes.map(s => s.price)).toFixed(2)} - ₱${Math.max(...item.sizes.map(s => s.price)).toFixed(2)}`
+                  ) : (
+                    `₱${item.price.toFixed(2)}`
+                  )}
                 </span>
                 <span className="text-sm text-gray-500">
-                  Stock: {item.stock}
+                  {item.hasSizes ? (
+                    <span className="bg-[#B0CE88]/20 text-stone-500 px-2 py-1 rounded text-xs">
+                      Multiple Sizes
+                    </span>
+                  ) : (
+                    `Stock: ${item.stock}`
+                  )}
                 </span>
               </div>
             </div>
           </div>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 }
 

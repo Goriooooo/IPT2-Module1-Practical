@@ -7,13 +7,14 @@ const AuthContext = createContext();
 
 // 2. Create the API instance
 const api = axios.create({
-  baseURL: 'http://localhost:4000/api', // Your backend URL
+  baseURL: `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api`,
 });
 
 // 3. Create the AuthProvider component
 export const AuthProvider = ({ children }) => {
   const [authUser, setAuthUser] = useState(null);
   const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   // 4. useEffect to load token on app start
   useEffect(() => {
@@ -43,6 +44,7 @@ export const AuthProvider = ({ children }) => {
         setUserData(null);
       }
     }
+    setLoading(false);
   }, []);
 
   // 5. THIS IS THE NEW, UPDATED LOGIN FUNCTION FOR GOOGLE OAUTH
@@ -58,12 +60,13 @@ export const AuthProvider = ({ children }) => {
       });
 
       // Set user and token in state and local storage
+      const decodedToken = jwtDecode(data.appToken);
       setAuthUser(data.appToken);
-      setUserData(jwtDecode(data.appToken));
+      setUserData(decodedToken);
       localStorage.setItem('appToken', data.appToken);
       api.defaults.headers.common['Authorization'] = `Bearer ${data.appToken}`;
       console.log('Login successful, token stored');
-      return { success: true };
+      return { success: true, user: data.user || decodedToken, userData: decodedToken };
     } catch (err) {
       console.error('Login error:', err);
       // Send the specific error message from the backend
@@ -79,12 +82,13 @@ export const AuthProvider = ({ children }) => {
       const { data } = await api.post('/auth/login', { email, password });
       
       // Set user and token in state and local storage
+      const decodedToken = jwtDecode(data.appToken);
       setAuthUser(data.appToken);
-      setUserData(jwtDecode(data.appToken));
+      setUserData(decodedToken);
       localStorage.setItem('appToken', data.appToken);
       api.defaults.headers.common['Authorization'] = `Bearer ${data.appToken}`;
       console.log('Manual login successful');
-      return { success: true, user: data.user };
+      return { success: true, user: data.user || decodedToken, userData: decodedToken };
     } catch (err) {
       console.error('Manual login error:', err);
       const message = err.response?.data?.message || 'Login failed';
@@ -127,7 +131,8 @@ export const AuthProvider = ({ children }) => {
       userData, 
       user: userData, // Add alias for backward compatibility
       isAuthenticated: !!authUser, // Add isAuthenticated helper
-      isAdmin: userData?.role === 'admin', // Add isAdmin helper
+      isAdmin: ['admin', 'staff', 'owner'].includes(userData?.role), // Add isAdmin helper - includes staff and owner
+      loading,
       login, 
       manualLogin,
       register,

@@ -1,4 +1,4 @@
-Eris Cafe – Full-Stack Cafe Management System
+#Eris Cafe – Full-Stack Cafe Management System
 A modern, full-stack cafe management web application built with the MERN stack (MongoDB, Express, React, Node.js) + TypeScript. Features online ordering, table reservations, user authentication, and a powerful admin dashboard.
 Features
 

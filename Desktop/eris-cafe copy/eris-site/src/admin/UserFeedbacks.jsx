@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Star, MessageSquare, Filter, TrendingUp, Eye, Trash2, Check } from 'lucide-react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import { SkeletonStats, SkeletonList } from '../components/SkeletonLoaders';
+import Pagination from '../components/Pagination';
 
 const UserFeedbacks = () => {
   const [feedbacks, setFeedbacks] = useState([]);
@@ -13,6 +14,9 @@ const UserFeedbacks = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFeedback, setSelectedFeedback] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   useEffect(() => {
     fetchFeedbacks();
@@ -130,6 +134,27 @@ const UserFeedbacks = () => {
     return matchesStatus && matchesType && matchesSearch;
   });
 
+  // Pagination logic
+  const totalPages = Math.ceil(filteredFeedbacks.length / itemsPerPage);
+  const paginatedFeedbacks = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredFeedbacks.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredFeedbacks, currentPage, itemsPerPage]);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterStatus, filterType]);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handleItemsPerPageChange = (newItemsPerPage) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1);
+  };
+
   const getRatingColor = (rating) => {
     if (rating >= 4) return 'text-green-500';
     if (rating >= 3) return 'text-yellow-500';
@@ -147,8 +172,8 @@ const UserFeedbacks = () => {
 
   if (loading) {
     return (
-      <div>
-        <div className='bg-gradient-to-bl from-[#2E1F1B] via-stone-700 to-[#5E4B43] px-4 md:px-8 pt-8 pb-8'>
+      <div className="min-h-screen bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50">
+        <div className='bg-gradient-to-bl from-[#2E1F1B]/90 via-stone-700/90 to-[#5E4B43]/90 backdrop-blur-sm px-4 md:px-8 pt-8 pb-8'>
           <div className="h-8 bg-white/20 rounded w-96 mb-6 animate-pulse"></div>
           <SkeletonStats />
         </div>
@@ -160,14 +185,14 @@ const UserFeedbacks = () => {
   }
 
   return (
-    <div>
+    <div className="min-h-screen bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50">
       {/* Gradient Header */}
-      <div className='bg-gradient-to-bl from-[#2E1F1B] via-stone-700 to-[#5E4B43] px-4 md:px-8 pt-8 pb-8'>
+      <div className='bg-gradient-to-bl from-[#2E1F1B]/90 via-stone-700/90 to-[#5E4B43]/90 backdrop-blur-sm px-4 md:px-8 pt-8 pb-8'>
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <h1 className="text-4xl md:text-5xl font-bold text-[#EDEDE6]">Customer Feedbacks</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-[#EDEDE6] drop-shadow-lg">Customer Feedbacks</h1>
           <button
             onClick={fetchFeedbacks}
-            className="px-4 py-3 bg-white/70 border border-white text-[#78350f] rounded-lg hover:bg-gray-100 transition font-semibold shadow-lg"
+            className="px-4 py-3 bg-white/70 border border-white text-[#78350f] rounded-xl hover:bg-gray-100 transition font-semibold shadow-lg"
           >
             Refresh
           </button>
@@ -176,7 +201,7 @@ const UserFeedbacks = () => {
          {/* Statistics Cards */}
           {stats && (
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="bg-white/70 border border-white rounded-lg shadow-md p-6">
+              <div className="glass-stat rounded-2xl p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-600">Total Feedbacks</p>
@@ -186,7 +211,7 @@ const UserFeedbacks = () => {
                 </div>
               </div>
 
-              <div className="bg-white/70 border border-white rounded-lg shadow-md p-6">
+              <div className="glass-stat rounded-2xl p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-600">Average Rating</p>
@@ -196,7 +221,7 @@ const UserFeedbacks = () => {
                 </div>
               </div>
 
-              <div className="bg-white/70 border border-white rounded-lg shadow-md p-6">
+              <div className="glass-stat rounded-2xl p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-600">Pending Review</p>
@@ -208,7 +233,7 @@ const UserFeedbacks = () => {
                 </div>
               </div>
 
-              <div className="bg-white/70 border border-white rounded-lg shadow-md p-6">
+              <div className="glass-stat rounded-2xl p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-600">Resolved</p>
@@ -224,20 +249,20 @@ const UserFeedbacks = () => {
         </div>
         <div className="mt-5">
           {/* Filters */}
-      <div className="bg-white/70 rounded-lg shadow-md p-4">
+      <div className="glass-stat rounded-2xl p-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <input
             type="text"
             placeholder="Search by feedback ID, customer name, or message..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600"
+            className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-600"
           />
           
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600"
+            className="px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-600"
           >
             <option value="All">All Status</option>
             <option value="Pending">Pending</option>
@@ -248,7 +273,7 @@ const UserFeedbacks = () => {
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600"
+            className="px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-600"
           >
             <option value="All">All Types</option>
             <option value="General">General</option>
@@ -269,9 +294,9 @@ const UserFeedbacks = () => {
       
 
       {/* Feedbacks Table */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      <div className="glass-card rounded-2xl overflow-hidden">
+        <table className="min-w-full divide-y divide-gray-200/30">
+          <thead className="bg-white/30 backdrop-blur-sm">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Feedback ID</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
@@ -283,16 +308,16 @@ const UserFeedbacks = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredFeedbacks.length === 0 ? (
+          <tbody className="bg-white/50 divide-y divide-gray-200/30">
+            {paginatedFeedbacks.length === 0 ? (
               <tr>
                 <td colSpan="8" className="px-6 py-8 text-center text-gray-500">
                   No feedbacks found
                 </td>
               </tr>
             ) : (
-              filteredFeedbacks.map((feedback) => (
-                <tr key={feedback._id} className="hover:bg-gray-50">
+              paginatedFeedbacks.map((feedback) => (
+                <tr key={feedback._id} className="hover:bg-white/50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {feedback.feedbackId}
                   </td>
@@ -350,12 +375,21 @@ const UserFeedbacks = () => {
             )}
           </tbody>
         </table>
+        {/* Pagination */}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          itemsPerPage={itemsPerPage}
+          totalItems={filteredFeedbacks.length}
+          onItemsPerPageChange={handleItemsPerPageChange}
+        />
       </div>
 
       {/* Feedback Details Modal */}
       {showModal && selectedFeedback && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="glass-modal rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="sticky top-0 bg-gradient-to-r from-amber-500 to-orange-600 text-white px-6 py-4 rounded-t-lg">
               <div className="flex justify-between items-center">
                 <div>
@@ -431,7 +465,7 @@ const UserFeedbacks = () => {
                 <textarea
                   defaultValue={selectedFeedback.adminNotes}
                   placeholder="Add admin notes..."
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500"
                   rows={3}
                   id="adminNotes"
                 />
@@ -446,7 +480,7 @@ const UserFeedbacks = () => {
                       const notes = document.getElementById('adminNotes').value;
                       updateFeedbackStatus(selectedFeedback._id, 'reviewed', notes);
                     }}
-                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700"
                   >
                     Mark as Reviewed
                   </button>
@@ -455,7 +489,7 @@ const UserFeedbacks = () => {
                       const notes = document.getElementById('adminNotes').value;
                       updateFeedbackStatus(selectedFeedback._id, 'resolved', notes);
                     }}
-                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700"
                   >
                     Mark as Resolved
                   </button>

@@ -217,7 +217,7 @@ export default function RevenueAnalytics() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50 p-6">
         <div className="mb-6">
           <div className="h-8 bg-gray-300 rounded w-64 mb-2 animate-pulse"></div>
           <div className="h-4 bg-gray-200 rounded w-96 animate-pulse"></div>
@@ -235,7 +235,7 @@ export default function RevenueAnalytics() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50 p-6">
       {/* Header */}
       <div className="mb-6">
         <button
@@ -259,7 +259,7 @@ export default function RevenueAnalytics() {
             <select
               value={timeRange}
               onChange={(e) => setTimeRange(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white/70 backdrop-blur-sm"
             >
               <option value="7days">Last 7 Days</option>
               <option value="30days">Last 30 Days</option>
@@ -269,7 +269,7 @@ export default function RevenueAnalytics() {
             
             <button
               onClick={exportToPDF}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700"
             >
               <Download className="w-4 h-4" />
               Export PDF
@@ -280,9 +280,9 @@ export default function RevenueAnalytics() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="glass-card rounded-2xl p-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-green-100 rounded-lg">
+            <div className="p-3 bg-green-100 rounded-xl">
               <DollarSign className="w-6 h-6 text-green-600" />
             </div>
             <div className="flex-1">
@@ -297,9 +297,9 @@ export default function RevenueAnalytics() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="glass-card rounded-2xl p-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-blue-100 rounded-lg">
+            <div className="p-3 bg-blue-100 rounded-xl">
               <ShoppingBag className="w-6 h-6 text-blue-600" />
             </div>
             <div>
@@ -309,9 +309,9 @@ export default function RevenueAnalytics() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="glass-card rounded-2xl p-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-purple-100 rounded-lg">
+            <div className="p-3 bg-purple-100 rounded-xl">
               <DollarSign className="w-6 h-6 text-purple-600" />
             </div>
             <div>
@@ -321,9 +321,9 @@ export default function RevenueAnalytics() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="glass-card rounded-2xl p-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-amber-100 rounded-lg">
+            <div className="p-3 bg-amber-100 rounded-xl">
               <Calendar className="w-6 h-6 text-amber-600" />
             </div>
             <div>
@@ -337,7 +337,7 @@ export default function RevenueAnalytics() {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Daily Revenue Trend */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="glass-card rounded-2xl p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4">Daily Revenue Trend</h2>
           {revenueData.dailyRevenue.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
@@ -361,7 +361,7 @@ export default function RevenueAnalytics() {
         </div>
 
         {/* Revenue by Category */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="glass-card rounded-2xl p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4">Revenue by Category</h2>
           {revenueData.revenueByCategory.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
@@ -386,23 +386,23 @@ export default function RevenueAnalytics() {
       </div>
 
       {/* Top Products Table */}
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="glass-card rounded-2xl p-6">
         <h2 className="text-xl font-bold text-gray-800 mb-4">Top 10 Revenue Products</h2>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b-2 border-gray-200">
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Rank</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Product Name</th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-700">Quantity Sold</th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-700">Total Revenue</th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-700">Avg Price</th>
+              <tr className="border-b border-gray-200/30">
+                <th className="text-left py-3 px-4 font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Rank</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Product Name</th>
+                <th className="text-right py-3 px-4 font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Quantity Sold</th>
+                <th className="text-right py-3 px-4 font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Total Revenue</th>
+                <th className="text-right py-3 px-4 font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Avg Price</th>
               </tr>
             </thead>
             <tbody>
               {revenueData.topRevenueProducts.length > 0 ? (
                 revenueData.topRevenueProducts.map((product, index) => (
-                  <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                  <tr key={index} className="border-b border-gray-200/30 hover:bg-white/50">
                     <td className="py-3 px-4 font-semibold text-blue-600">#{index + 1}</td>
                     <td className="py-3 px-4 text-gray-900">{product.name}</td>
                     <td className="py-3 px-4 text-right text-gray-700">{product.quantity}</td>

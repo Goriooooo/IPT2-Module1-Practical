@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Plus, Edit, Archive, Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import { SkeletonCard } from '../components/SkeletonLoaders';
+import Pagination from '../components/Pagination';
 
 const ProductsPage = () => {
   const navigate = useNavigate();
@@ -12,6 +13,9 @@ const ProductsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [formData, setFormData] = useState({
     name: '',
     price: '',
@@ -280,15 +284,38 @@ const ProductsPage = () => {
         confirmButtonColor: '#8B5CF6'
       });
     }
-  };  const filteredProducts = products.filter(product =>
+  };
+  
+  const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Pagination logic
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const paginatedProducts = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredProducts.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredProducts, currentPage, itemsPerPage]);
+
+  // Reset to first page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handleItemsPerPageChange = (newItemsPerPage) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1);
+  };
+
   if (loading) {
     return (
-      <div>
-        <div className='bg-gradient-to-bl from-[#2E1F1B] via-stone-700 to-[#5E4B43] px-4 md:px-8 pt-8 pb-8'>
+      <div className="min-h-screen bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50">
+        <div className='bg-gradient-to-bl from-[#2E1F1B]/90 via-stone-700/90 to-[#5E4B43]/90 backdrop-blur-sm px-4 md:px-8 pt-8 pb-8'>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5 animate-pulse">
             <div className="h-12 bg-white/20 rounded w-80"></div>
             <div className="flex gap-3">
@@ -311,22 +338,22 @@ const ProductsPage = () => {
   }
 
   return (
-    <div>
+    <div className="min-h-screen bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50">
       {/* Gradient Header */}
-      <div className='bg-gradient-to-bl from-[#2E1F1B] via-stone-700 to-[#5E4B43] px-4 md:px-8 pt-8 pb-8'>
+      <div className='bg-gradient-to-bl from-[#2E1F1B]/90 via-stone-700/90 to-[#5E4B43]/90 backdrop-blur-sm px-4 md:px-8 pt-8 pb-8'>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h1 className="text-4xl md:text-5xl font-bold text-[#EDEDE6]">Products Management</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-[#EDEDE6] drop-shadow-lg">Products Management</h1>
           <div className="flex gap-3">
             <button 
               onClick={() => navigate('/admin/products/archived')}
-              className="bg-[#B0CE88] text-white px-6 py-3 rounded-lg hover:bg-stone-700 transition-colors flex items-center space-x-2 font-semibold shadow-lg"
+              className="bg-[#B0CE88]/80 backdrop-blur-sm text-white px-6 py-3 rounded-xl hover:bg-stone-700 transition-colors flex items-center space-x-2 font-semibold shadow-lg"
             >
               <Archive size={20} />
               <span>View Archive</span>
             </button>
             <button 
               onClick={() => openModal()}
-              className="bg-white text-violet-600 px-6 py-3 rounded-lg hover:bg-gray-100 transition-colors flex items-center space-x-2 font-semibold shadow-lg"
+              className="glass-stat text-violet-600 px-6 py-3 rounded-xl hover:bg-white/90 transition-colors flex items-center space-x-2 font-semibold"
             >
               <Plus size={20} />
               <span>Add Product</span>
@@ -335,7 +362,7 @@ const ProductsPage = () => {
         </div>
         <div className="mt-5">
            {/* Search Bar */}
-            <div className="bg-white/70 border border-white rounded-lg shadow-md p-4">
+            <div className="glass-stat rounded-2xl p-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                 <input
@@ -343,7 +370,7 @@ const ProductsPage = () => {
                   placeholder="Search products by name or category..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-coffee"
+                  className="w-full pl-10 pr-4 py-2 glass-input rounded-xl focus:outline-none focus:ring-2 focus:ring-coffee"
                 />
               </div>
             </div>
@@ -355,10 +382,10 @@ const ProductsPage = () => {
      
 
       {/* Products Table */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      <div className="glass-card rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50">
+            <thead className="bg-white/30 backdrop-blur-sm">
               <tr>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Product</th>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Category</th>
@@ -369,21 +396,21 @@ const ProductsPage = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredProducts.length === 0 ? (
+              {paginatedProducts.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="py-8 text-center text-gray-500">
                     {searchTerm ? 'No products found matching your search' : 'No products available. Click "Add Product" to create one.'}
                   </td>
                 </tr>
               ) : (
-                filteredProducts.map((product) => (
-                  <tr key={product._id} className="border-b hover:bg-gray-50 transition-colors">
+                paginatedProducts.map((product) => (
+                  <tr key={product._id} className="border-b border-gray-200/30 hover:bg-white/50 transition-colors">
                     <td className="py-3 px-4">
                       <div className="flex items-center space-x-3">
                         <img 
                           src={product.image || 'https://via.placeholder.com/50'} 
                           alt={product.name} 
-                          className="w-12 h-12 rounded-lg object-cover"
+                          className="w-12 h-12 rounded-xl object-cover"
                           onError={(e) => e.target.src = 'https://via.placeholder.com/50'}
                         />
                         <div>
@@ -405,18 +432,18 @@ const ProductsPage = () => {
                     </td>
                     <td className="py-3 px-4">
                       <span className={`
-                        px-2 py-1 text-xs font-semibold rounded-full
-                        ${product.stock > 50 ? 'bg-green-100 text-green-800' : 
-                          product.stock > 20 ? 'bg-yellow-100 text-yellow-800' : 
-                          'bg-red-100 text-red-800'}
+                        px-2 py-1 text-xs font-semibold rounded-full backdrop-blur-sm
+                        ${product.stock > 50 ? 'bg-green-100/80 text-green-800' : 
+                          product.stock > 20 ? 'bg-yellow-100/80 text-yellow-800' : 
+                          'bg-red-100/80 text-red-800'}
                       `}>
                         {product.stock} in stock
                       </span>
                     </td>
                     <td className="py-3 px-4">
                       <span className={`
-                        px-2 py-1 text-xs font-semibold rounded-full
-                        ${product.isAvailable ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}
+                        px-2 py-1 text-xs font-semibold rounded-full backdrop-blur-sm
+                        ${product.isAvailable ? 'bg-green-100/80 text-green-800' : 'bg-gray-100/80 text-gray-800'}
                       `}>
                         {product.isAvailable ? 'Available' : 'Unavailable'}
                       </span>
@@ -425,14 +452,14 @@ const ProductsPage = () => {
                       <div className="flex space-x-2">
                         <button 
                           onClick={() => openModal(product)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          className="p-2 text-blue-600 hover:bg-blue-50/50 rounded-xl transition-colors"
                           title="Edit product"
                         >
                           <Edit size={18} />
                         </button>
                         <button 
                           onClick={() => handleArchive(product._id, product.name)}
-                          className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                          className="p-2 text-amber-600 hover:bg-amber-50/50 rounded-xl transition-colors"
                           title="Archive product"
                         >
                           <Archive size={18} />
@@ -444,14 +471,23 @@ const ProductsPage = () => {
               )}
             </tbody>
           </table>
+          {/* Pagination */}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            itemsPerPage={itemsPerPage}
+            totalItems={filteredProducts.length}
+            onItemsPerPageChange={handleItemsPerPageChange}
+          />
         </div>
       </div>
 
       {/* Add/Edit Product Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="glass-modal rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white/90 backdrop-blur-md border-b border-gray-200/50 px-6 py-4 flex justify-between items-center rounded-t-2xl">
               <h2 className="text-2xl font-bold text-gray-800">
                 {editingProduct ? 'Edit Product' : 'Add New Product'}
               </h2>

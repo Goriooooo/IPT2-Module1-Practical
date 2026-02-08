@@ -241,18 +241,18 @@ const RoleAccessControl = () => {
   }
 
   return (
-    <div>
+    <div className="min-h-screen bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50">
       {/* Header */}
-      <div className='bg-gradient-to-bl from-[#2E1F1B] via-stone-700 to-[#5E4B43] px-4 md:px-8 pt-8 pb-8'>
+      <div className='bg-gradient-to-bl from-[#2E1F1B]/90 via-stone-700/90 to-[#5E4B43]/90 backdrop-blur-sm px-4 md:px-8 pt-8 pb-8'>
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h1 className='text-[#EDEDE6] text-3xl md:text-4xl font-bold mb-2'>Role-Based Access Control</h1>
+            <h1 className='text-[#EDEDE6] drop-shadow-lg text-3xl md:text-4xl font-bold mb-2'>Role-Based Access Control</h1>
             <p className='text-white/90'>Manage user roles and their permissions</p>
           </div>
         </div>
         
         {/* Role Hierarchy Info */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 mt-4">
+        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mt-4">
           <div className="flex items-start gap-3">
             <AlertTriangle className="text-yellow-300 flex-shrink-0 mt-1" size={20} />
             <div className="text-white">
@@ -272,7 +272,7 @@ const RoleAccessControl = () => {
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {roles.map((role) => (
-            <div key={role.id} className="bg-white rounded-xl shadow-md p-6">
+            <div key={role.id} className="glass-card rounded-2xl p-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className={`w-12 h-12 ${role.color} rounded-lg flex items-center justify-center`}>
                   <Shield className="text-white" size={24} />
@@ -297,7 +297,7 @@ const RoleAccessControl = () => {
             const permissions = isEditing ? tempPermissions : role.permissions;
 
             return (
-              <div key={role.id} className="bg-white rounded-xl shadow-md overflow-hidden">
+              <div key={role.id} className="glass-card rounded-2xl overflow-hidden">
                 {/* Role Header */}
                 <div className={`${role.color} p-6 flex justify-between items-center`}>
                   <div className="flex items-center gap-3">
@@ -312,14 +312,14 @@ const RoleAccessControl = () => {
                       <>
                         <button
                           onClick={() => handleSaveRole(role.id)}
-                          className="px-4 py-2 bg-white text-gray-800 rounded-lg hover:bg-gray-100 transition font-semibold flex items-center gap-2"
+                          className="px-4 py-2 bg-white text-gray-800 rounded-xl hover:bg-white/50 transition font-semibold flex items-center gap-2"
                         >
                           <Save size={18} />
                           Save
                         </button>
                         <button
                           onClick={handleCancelEdit}
-                          className="px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition font-semibold flex items-center gap-2"
+                          className="px-4 py-2 bg-white/20 text-white rounded-xl hover:bg-white/30 transition font-semibold flex items-center gap-2"
                         >
                           <X size={18} />
                           Cancel
@@ -328,7 +328,7 @@ const RoleAccessControl = () => {
                     ) : (
                       <button
                         onClick={() => handleEditRole(role)}
-                        className="px-4 py-2 bg-white text-gray-800 rounded-lg hover:bg-gray-100 transition font-semibold flex items-center gap-2"
+                        className="px-4 py-2 bg-white text-gray-800 rounded-xl hover:bg-white/50 transition font-semibold flex items-center gap-2"
                       >
                         <Edit2 size={18} />
                         Edit Permissions
@@ -341,8 +341,8 @@ const RoleAccessControl = () => {
                 <div className="p-6">
                   <div className="overflow-x-auto">
                     <table className="w-full">
-                      <thead>
-                        <tr className="border-b-2 border-gray-200">
+                      <thead className="bg-white/30 backdrop-blur-sm">
+                        <tr className="border-b border-gray-200/30">
                           <th className="text-left py-3 px-4 font-semibold text-gray-700">Module</th>
                           <th className="text-center py-3 px-4 font-semibold text-gray-700">View</th>
                           <th className="text-center py-3 px-4 font-semibold text-gray-700">Create</th>
@@ -352,7 +352,7 @@ const RoleAccessControl = () => {
                       </thead>
                       <tbody>
                         {/* Dashboard */}
-                        <tr className="border-b border-gray-100 hover:bg-gray-50">
+                        <tr className="border-b border-gray-200/30 hover:bg-white/50">
                           <td className="py-3 px-4 font-medium text-gray-800">Dashboard</td>
                           <td className="py-3 px-4 text-center" colSpan="4">
                             {isEditing 
@@ -363,7 +363,7 @@ const RoleAccessControl = () => {
                         </tr>
 
                         {/* Products */}
-                        <tr className="border-b border-gray-100 hover:bg-gray-50">
+                        <tr className="border-b border-gray-200/30 hover:bg-white/50">
                           <td className="py-3 px-4 font-medium text-gray-800">Products</td>
                           <td className="py-3 px-4 text-center">
                             {isEditing 
@@ -392,7 +392,7 @@ const RoleAccessControl = () => {
                         </tr>
 
                         {/* Orders */}
-                        <tr className="border-b border-gray-100 hover:bg-gray-50">
+                        <tr className="border-b border-gray-200/30 hover:bg-white/50">
                           <td className="py-3 px-4 font-medium text-gray-800">Orders</td>
                           <td className="py-3 px-4 text-center">
                             {isEditing 
@@ -421,7 +421,7 @@ const RoleAccessControl = () => {
                         </tr>
 
                         {/* Reservations */}
-                        <tr className="border-b border-gray-100 hover:bg-gray-50">
+                        <tr className="border-b border-gray-200/30 hover:bg-white/50">
                           <td className="py-3 px-4 font-medium text-gray-800">Reservations</td>
                           <td className="py-3 px-4 text-center">
                             {isEditing 
@@ -450,7 +450,7 @@ const RoleAccessControl = () => {
                         </tr>
 
                         {/* Customers */}
-                        <tr className="border-b border-gray-100 hover:bg-gray-50">
+                        <tr className="border-b border-gray-200/30 hover:bg-white/50">
                           <td className="py-3 px-4 font-medium text-gray-800">Customers</td>
                           <td className="py-3 px-4 text-center">
                             {isEditing 
@@ -479,7 +479,7 @@ const RoleAccessControl = () => {
                         </tr>
 
                         {/* Feedbacks */}
-                        <tr className="border-b border-gray-100 hover:bg-gray-50">
+                        <tr className="border-b border-gray-200/30 hover:bg-white/50">
                           <td className="py-3 px-4 font-medium text-gray-800">Feedbacks</td>
                           <td className="py-3 px-4 text-center">
                             {isEditing 
@@ -508,7 +508,7 @@ const RoleAccessControl = () => {
                         </tr>
 
                         {/* Settings */}
-                        <tr className="border-b border-gray-100 hover:bg-gray-50">
+                        <tr className="border-b border-gray-200/30 hover:bg-white/50">
                           <td className="py-3 px-4 font-medium text-gray-800">Settings</td>
                           <td className="py-3 px-4 text-center">
                             {isEditing 
@@ -528,7 +528,7 @@ const RoleAccessControl = () => {
                         </tr>
 
                         {/* Role Access Control */}
-                        <tr className="border-b border-gray-100 hover:bg-gray-50">
+                        <tr className="border-b border-gray-200/30 hover:bg-white/50">
                           <td className="py-3 px-4 font-medium text-gray-800">Role Access Control</td>
                           <td className="py-3 px-4 text-center">
                             {isEditing 
@@ -548,7 +548,7 @@ const RoleAccessControl = () => {
                         </tr>
 
                         {/* Login Monitoring */}
-                        <tr className="border-b border-gray-100 hover:bg-gray-50">
+                        <tr className="border-b border-gray-200/30 hover:bg-white/50">
                           <td className="py-3 px-4 font-medium text-gray-800">Login Monitoring</td>
                           <td className="py-3 px-4 text-center">
                             {isEditing 

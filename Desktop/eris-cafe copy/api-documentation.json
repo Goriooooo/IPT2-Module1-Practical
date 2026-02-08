@@ -1,0 +1,1067 @@
+{
+  "info": {
+    "title": "Eris Cafe API Documentation",
+    "version": "1.0.0",
+    "description": "Complete API documentation for Eris Cafe backend",
+    "baseUrl": "http://localhost:4000"
+  },
+  "authentication": {
+    "type": "Bearer Token",
+    "header": "Authorization",
+    "format": "Bearer <token>",
+    "note": "Get token from login response (appToken field)"
+  },
+  "modules": {
+    "1_USER_MODULE": {
+      "description": "Handles user registration, authentication, and profile management",
+      "endpoints": [
+        {
+          "name": "2.1.1 Register User",
+          "method": "POST",
+          "url": "/api/auth/register",
+          "auth": false,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "name": "John Doe",
+            "email": "john@test.com",
+            "password": "123456"
+          },
+          "response": {
+            "message": "Registration successful",
+            "appToken": "jwt_token_here",
+            "user": {
+              "id": "user_id",
+              "name": "John Doe",
+              "email": "john@test.com",
+              "role": "customer"
+            }
+          }
+        },
+        {
+          "name": "2.1.2 Get User Details",
+          "method": "GET",
+          "url": "/api/auth/me",
+          "auth": true,
+          "headers": {
+            "Authorization": "Bearer YOUR_TOKEN_HERE"
+          },
+          "body": null,
+          "response": {
+            "success": true,
+            "user": {
+              "id": "user_id",
+              "name": "John Doe",
+              "email": "john@test.com",
+              "role": "customer"
+            }
+          }
+        },
+        {
+          "name": "2.1.3 Get All Users (Admin)",
+          "method": "GET",
+          "url": "/api/admin/users",
+          "auth": true,
+          "requiresAdmin": true,
+          "headers": {
+            "Authorization": "Bearer ADMIN_TOKEN_HERE"
+          },
+          "body": null,
+          "response": {
+            "success": true,
+            "data": []
+          }
+        },
+        {
+          "name": "2.1.4 Update User Details",
+          "method": "PUT",
+          "url": "/api/auth/update-profile",
+          "auth": true,
+          "headers": {
+            "Authorization": "Bearer YOUR_TOKEN_HERE",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "name": "Updated Name",
+            "email": "john@test.com",
+            "phone": "09123456789",
+            "address": "123 Main St, Manila",
+            "bio": "Coffee lover"
+          },
+          "response": {
+            "success": true,
+            "message": "Profile updated successfully",
+            "appToken": "new_jwt_token",
+            "user": {}
+          }
+        },
+        {
+          "name": "2.1.5 Delete User (Admin)",
+          "method": "DELETE",
+          "url": "/api/admin/users/:userId",
+          "auth": true,
+          "requiresAdmin": true,
+          "headers": {
+            "Authorization": "Bearer ADMIN_TOKEN_HERE",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "adminPassword": "admin123"
+          },
+          "response": {
+            "success": true,
+            "message": "User deleted successfully"
+          }
+        }
+      ]
+    },
+    "2_ADMIN_MODULE": {
+      "description": "Handles admin account management and access control",
+      "endpoints": [
+        {
+          "name": "2.2.1 Create Admin Account",
+          "method": "POST",
+          "url": "/api/admin/users/add",
+          "auth": true,
+          "requiresAdmin": true,
+          "headers": {
+            "Authorization": "Bearer ADMIN_TOKEN_HERE",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "name": "New Staff",
+            "email": "staff@eriscafe.com",
+            "password": "staff123",
+            "role": "staff",
+            "adminPassword": "admin123"
+          },
+          "note": "role can be: admin, owner, staff, customer",
+          "response": {
+            "success": true,
+            "message": "User created successfully",
+            "data": {}
+          }
+        },
+        {
+          "name": "2.2.2 Login Admin",
+          "method": "POST",
+          "url": "/api/auth/login",
+          "auth": false,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "email": "admin@eriscafe.com",
+            "password": "admin123"
+          },
+          "response": {
+            "message": "Login successful",
+            "appToken": "jwt_token_here",
+            "user": {
+              "id": "admin_id",
+              "name": "Admin User",
+              "email": "admin@eriscafe.com",
+              "role": "admin"
+            }
+          }
+        },
+        {
+          "name": "2.2.3 Get Admin Profile",
+          "method": "GET",
+          "url": "/api/auth/me",
+          "auth": true,
+          "headers": {
+            "Authorization": "Bearer ADMIN_TOKEN_HERE"
+          },
+          "body": null,
+          "response": {
+            "success": true,
+            "user": {
+              "id": "admin_id",
+              "name": "Admin User",
+              "email": "admin@eriscafe.com",
+              "role": "admin"
+            }
+          }
+        },
+        {
+          "name": "2.2.4 Check Admin Access (Dashboard Stats)",
+          "method": "GET",
+          "url": "/api/admin/stats",
+          "auth": true,
+          "requiresAdmin": true,
+          "headers": {
+            "Authorization": "Bearer ADMIN_TOKEN_HERE"
+          },
+          "body": null,
+          "response": {
+            "success": true,
+            "data": {
+              "totalUsers": 13,
+              "totalOrders": 25,
+              "totalReservations": 19,
+              "pendingOrders": 7,
+              "confirmedReservations": 6,
+              "totalRevenue": null
+            }
+          }
+        },
+        {
+          "name": "2.2.5 Update User Role",
+          "method": "PUT",
+          "url": "/api/admin/users/:userId/role",
+          "auth": true,
+          "requiresAdmin": true,
+          "headers": {
+            "Authorization": "Bearer ADMIN_TOKEN_HERE",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "role": "staff",
+            "adminPassword": "admin123"
+          },
+          "response": {
+            "success": true,
+            "message": "User role updated successfully",
+            "data": {}
+          }
+        },
+        {
+          "name": "2.2.6 Get Login Logs",
+          "method": "GET",
+          "url": "/api/admin/login-logs",
+          "auth": true,
+          "requiresAdmin": true,
+          "headers": {
+            "Authorization": "Bearer ADMIN_TOKEN_HERE"
+          },
+          "queryParams": {
+            "role": "admin|customer|staff (optional)",
+            "status": "success|failed (optional)",
+            "limit": "100 (optional)"
+          },
+          "body": null,
+          "response": {
+            "success": true,
+            "data": {
+              "logs": [],
+              "stats": {
+                "totalLogins": 0,
+                "successfulLogins": 0,
+                "failedLogins": 0,
+                "activeUsers": 0
+              }
+            }
+          }
+        },
+        {
+          "name": "2.2.7 Get Role Permissions",
+          "method": "GET",
+          "url": "/api/admin/role-permissions",
+          "auth": true,
+          "requiresAdmin": true,
+          "headers": {
+            "Authorization": "Bearer ADMIN_TOKEN_HERE"
+          },
+          "body": null,
+          "response": {
+            "success": true,
+            "data": []
+          }
+        }
+      ]
+    },
+    "3_ORDER_MODULE": {
+      "description": "Handles customer orders, order status, and order history",
+      "endpoints": [
+        {
+          "name": "3.1 Create Order",
+          "method": "POST",
+          "url": "/api/orders/create",
+          "auth": true,
+          "headers": {
+            "Authorization": "Bearer USER_TOKEN_HERE",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "items": [
+              {
+                "productId": "PRODUCT_ID_HERE",
+                "name": "Espresso",
+                "price": 120,
+                "quantity": 2,
+                "size": "Medium",
+                "temperature": "Hot",
+                "image": "https://example.com/image.jpg"
+              }
+            ],
+            "totalPrice": 240,
+            "deliveryAddress": "123 Main St, Manila",
+            "paymentMethod": "cod",
+            "customerInfo": {
+              "name": "John Doe",
+              "email": "john@test.com",
+              "phone": "09123456789",
+              "address": "123 Main St, Manila"
+            }
+          },
+          "response": {
+            "success": true,
+            "message": "Order placed successfully. Stock updated.",
+            "data": {}
+          }
+        },
+        {
+          "name": "3.2 Get My Orders",
+          "method": "GET",
+          "url": "/api/orders/my-orders",
+          "auth": true,
+          "headers": {
+            "Authorization": "Bearer USER_TOKEN_HERE"
+          },
+          "body": null,
+          "response": {
+            "success": true,
+            "data": []
+          }
+        },
+        {
+          "name": "3.3 Get Single Order",
+          "method": "GET",
+          "url": "/api/orders/:orderId",
+          "auth": true,
+          "headers": {
+            "Authorization": "Bearer USER_TOKEN_HERE"
+          },
+          "body": null,
+          "response": {
+            "success": true,
+            "data": {}
+          }
+        },
+        {
+          "name": "3.4 Update Order Status (Admin)",
+          "method": "PATCH",
+          "url": "/api/orders/:orderId/status",
+          "auth": true,
+          "headers": {
+            "Authorization": "Bearer ADMIN_TOKEN_HERE",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "status": "confirmed"
+          },
+          "validStatuses": ["pending", "confirmed", "preparing", "ready", "completed", "cancelled"],
+          "response": {
+            "success": true,
+            "message": "Order status updated successfully",
+            "data": {}
+          }
+        },
+        {
+          "name": "3.5 Cancel Order",
+          "method": "DELETE",
+          "url": "/api/orders/:orderId",
+          "auth": true,
+          "headers": {
+            "Authorization": "Bearer USER_TOKEN_HERE"
+          },
+          "body": null,
+          "response": {
+            "success": true,
+            "message": "Order cancelled successfully and stock restored",
+            "data": {}
+          }
+        },
+        {
+          "name": "3.6 Get All Orders (Admin)",
+          "method": "GET",
+          "url": "/api/admin/orders",
+          "auth": true,
+          "requiresAdmin": true,
+          "headers": {
+            "Authorization": "Bearer ADMIN_TOKEN_HERE"
+          },
+          "queryParams": {
+            "page": "1 (optional)",
+            "limit": "20 (optional)"
+          },
+          "body": null,
+          "response": {
+            "success": true,
+            "data": [],
+            "pagination": {
+              "page": 1,
+              "limit": 20,
+              "total": 0,
+              "pages": 0
+            }
+          }
+        }
+      ]
+    },
+    "4_RESERVATION_MODULE": {
+      "description": "Handles table reservations and calendar integration",
+      "endpoints": [
+        {
+          "name": "4.1 Create Reservation",
+          "method": "POST",
+          "url": "/api/reservations/create",
+          "auth": true,
+          "headers": {
+            "Authorization": "Bearer USER_TOKEN_HERE",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "customerInfo": {
+              "name": "John Doe",
+              "email": "john@test.com",
+              "phone": "09123456789"
+            },
+            "date": "2025-12-10",
+            "time": "14:00",
+            "guests": 4,
+            "tableId": "T1",
+            "specialRequests": "Window seat please"
+          },
+          "response": {
+            "success": true,
+            "message": "Reservation created successfully. Awaiting admin confirmation.",
+            "data": {}
+          }
+        },
+        {
+          "name": "4.2 Get My Reservations",
+          "method": "GET",
+          "url": "/api/reservations/my-reservations",
+          "auth": true,
+          "headers": {
+            "Authorization": "Bearer USER_TOKEN_HERE"
+          },
+          "body": null,
+          "response": {
+            "success": true,
+            "data": []
+          }
+        },
+        {
+          "name": "4.3 Get Single Reservation",
+          "method": "GET",
+          "url": "/api/reservations/:reservationId",
+          "auth": true,
+          "headers": {
+            "Authorization": "Bearer USER_TOKEN_HERE"
+          },
+          "body": null,
+          "response": {
+            "success": true,
+            "data": {}
+          }
+        },
+        {
+          "name": "4.4 Update Reservation",
+          "method": "PUT",
+          "url": "/api/reservations/:reservationId",
+          "auth": true,
+          "headers": {
+            "Authorization": "Bearer USER_TOKEN_HERE",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "date": "2025-12-12",
+            "time": "15:00",
+            "guests": 6,
+            "specialRequests": "Birthday celebration"
+          },
+          "response": {
+            "success": true,
+            "message": "Reservation updated successfully",
+            "data": {}
+          }
+        },
+        {
+          "name": "4.5 Cancel Reservation",
+          "method": "DELETE",
+          "url": "/api/reservations/:reservationId",
+          "auth": true,
+          "headers": {
+            "Authorization": "Bearer USER_TOKEN_HERE"
+          },
+          "body": null,
+          "response": {
+            "success": true,
+            "message": "Reservation cancelled successfully",
+            "data": {}
+          }
+        },
+        {
+          "name": "4.6 Update Reservation Status (Admin)",
+          "method": "PATCH",
+          "url": "/api/reservations/:reservationId/status",
+          "auth": true,
+          "requiresAdmin": true,
+          "headers": {
+            "Authorization": "Bearer ADMIN_TOKEN_HERE",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "status": "confirmed"
+          },
+          "validStatuses": ["pending", "confirmed", "cancelled", "completed", "no-show"],
+          "response": {
+            "success": true,
+            "data": {}
+          }
+        },
+        {
+          "name": "4.7 Get All Reservations (Admin)",
+          "method": "GET",
+          "url": "/api/admin/reservations",
+          "auth": true,
+          "requiresAdmin": true,
+          "headers": {
+            "Authorization": "Bearer ADMIN_TOKEN_HERE"
+          },
+          "queryParams": {
+            "page": "1 (optional)",
+            "limit": "20 (optional)"
+          },
+          "body": null,
+          "response": {
+            "success": true,
+            "data": [],
+            "pagination": {
+              "page": 1,
+              "limit": 20,
+              "total": 0,
+              "pages": 0
+            }
+          }
+        },
+        {
+          "name": "4.8 Update Calendar Event ID",
+          "method": "PATCH",
+          "url": "/api/reservations/:reservationId/calendar-event",
+          "auth": true,
+          "headers": {
+            "Authorization": "Bearer USER_TOKEN_HERE",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "googleCalendarEventId": "event_id_from_google"
+          },
+          "response": {
+            "success": true,
+            "message": "Calendar event ID updated",
+            "data": {}
+          }
+        }
+      ]
+    },
+    "5_MENU_MODULE": {
+      "description": "Handles menu items (products) management",
+      "endpoints": [
+        {
+          "name": "5.1 Get All Products",
+          "method": "GET",
+          "url": "/api/products",
+          "auth": false,
+          "queryParams": {
+            "category": "coffee (optional)",
+            "featured": "true (optional)",
+            "search": "espresso (optional)",
+            "includeArchived": "true (optional)"
+          },
+          "body": null,
+          "response": {
+            "success": true,
+            "data": []
+          }
+        },
+        {
+          "name": "5.2 Get Best Sellers",
+          "method": "GET",
+          "url": "/api/products/best-sellers",
+          "auth": false,
+          "queryParams": {
+            "limit": "15 (optional)"
+          },
+          "body": null,
+          "response": {
+            "success": true,
+            "data": []
+          }
+        },
+        {
+          "name": "5.3 Get Single Product",
+          "method": "GET",
+          "url": "/api/products/:productId",
+          "auth": false,
+          "body": null,
+          "response": {
+            "success": true,
+            "data": {}
+          }
+        },
+        {
+          "name": "5.4 Get Archived Products",
+          "method": "GET",
+          "url": "/api/products/archived/all",
+          "auth": false,
+          "body": null,
+          "response": {
+            "success": true,
+            "data": []
+          }
+        },
+        {
+          "name": "5.5 Create Product (Admin)",
+          "method": "POST",
+          "url": "/api/products",
+          "auth": true,
+          "requiresAdmin": true,
+          "headers": {
+            "Authorization": "Bearer ADMIN_TOKEN_HERE",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "name": "Caramel Macchiato",
+            "price": 150,
+            "description": "Sweet espresso with caramel",
+            "category": "coffee",
+            "image": "https://example.com/image.jpg",
+            "inStock": true,
+            "featured": true
+          },
+          "response": {
+            "success": true,
+            "data": {}
+          }
+        },
+        {
+          "name": "5.6 Update Product (Admin)",
+          "method": "PUT",
+          "url": "/api/products/:productId",
+          "auth": true,
+          "requiresAdmin": true,
+          "headers": {
+            "Authorization": "Bearer ADMIN_TOKEN_HERE",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "name": "Updated Product Name",
+            "price": 180,
+            "description": "Updated description"
+          },
+          "response": {
+            "success": true,
+            "data": {}
+          }
+        },
+        {
+          "name": "5.7 Archive Product (Admin)",
+          "method": "PATCH",
+          "url": "/api/products/:productId/archive",
+          "auth": true,
+          "requiresAdmin": true,
+          "headers": {
+            "Authorization": "Bearer ADMIN_TOKEN_HERE"
+          },
+          "body": null,
+          "response": {
+            "success": true,
+            "data": {},
+            "message": "Product archived successfully"
+          }
+        },
+        {
+          "name": "5.8 Unarchive Product (Admin)",
+          "method": "PATCH",
+          "url": "/api/products/:productId/unarchive",
+          "auth": true,
+          "requiresAdmin": true,
+          "headers": {
+            "Authorization": "Bearer ADMIN_TOKEN_HERE"
+          },
+          "body": null,
+          "response": {
+            "success": true,
+            "data": {},
+            "message": "Product restored successfully"
+          }
+        },
+        {
+          "name": "5.9 Delete Product (Admin)",
+          "method": "DELETE",
+          "url": "/api/products/:productId",
+          "auth": true,
+          "requiresAdmin": true,
+          "headers": {
+            "Authorization": "Bearer ADMIN_TOKEN_HERE"
+          },
+          "body": null,
+          "response": {
+            "success": true,
+            "message": "Product deleted successfully"
+          }
+        }
+      ]
+    },
+    "6_REPORT_MODULE": {
+      "description": "Handles sales reports and analytics",
+      "endpoints": [
+        {
+          "name": "6.1 Get Dashboard Stats",
+          "method": "GET",
+          "url": "/api/admin/stats",
+          "auth": true,
+          "requiresAdmin": true,
+          "headers": {
+            "Authorization": "Bearer ADMIN_TOKEN_HERE"
+          },
+          "body": null,
+          "response": {
+            "success": true,
+            "data": {
+              "totalUsers": 13,
+              "totalOrders": 25,
+              "totalReservations": 19,
+              "pendingOrders": 7,
+              "confirmedReservations": 6,
+              "totalRevenue": null
+            }
+          }
+        },
+        {
+          "name": "6.2 Get Login Logs",
+          "method": "GET",
+          "url": "/api/admin/login-logs",
+          "auth": true,
+          "requiresAdmin": true,
+          "headers": {
+            "Authorization": "Bearer ADMIN_TOKEN_HERE"
+          },
+          "queryParams": {
+            "role": "admin|customer|staff (optional)",
+            "status": "success|failed (optional)",
+            "startDate": "2025-01-01 (optional)",
+            "endDate": "2025-12-31 (optional)",
+            "limit": "100 (optional)"
+          },
+          "body": null,
+          "response": {
+            "success": true,
+            "data": {
+              "logs": [],
+              "stats": {}
+            }
+          }
+        }
+      ]
+    },
+    "7_FILE_STORAGE_MODULE": {
+      "description": "Handles image uploads via Cloudinary",
+      "endpoints": [
+        {
+          "name": "7.1 Upload Image",
+          "method": "POST",
+          "url": "/api/upload/image",
+          "auth": false,
+          "headers": {
+            "Content-Type": "multipart/form-data"
+          },
+          "body": {
+            "image": "<file>"
+          },
+          "note": "Use form-data with file field named 'image'",
+          "response": {
+            "success": true,
+            "message": "Image uploaded successfully",
+            "data": {
+              "url": "https://res.cloudinary.com/...",
+              "publicId": "eris-cafe/products/...",
+              "width": 800,
+              "height": 800
+            }
+          }
+        },
+        {
+          "name": "7.2 Delete Image",
+          "method": "DELETE",
+          "url": "/api/upload/image/:publicId",
+          "auth": false,
+          "note": "Replace / with , in publicId (e.g., eris-cafe,products,image_id)",
+          "body": null,
+          "response": {
+            "success": true,
+            "message": "Image deleted successfully"
+          }
+        }
+      ]
+    },
+    "8_SECURITY_MODULE": {
+      "description": "Handles JWT authentication and session management",
+      "endpoints": [
+        {
+          "name": "8.1 Register (Token Generation)",
+          "method": "POST",
+          "url": "/api/auth/register",
+          "auth": false,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "name": "New User",
+            "email": "newuser@test.com",
+            "password": "123456"
+          },
+          "response": {
+            "message": "Registration successful",
+            "appToken": "jwt_token_here",
+            "user": {}
+          }
+        },
+        {
+          "name": "8.2 Login (Token Generation)",
+          "method": "POST",
+          "url": "/api/auth/login",
+          "auth": false,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "email": "user@test.com",
+            "password": "123456"
+          },
+          "response": {
+            "message": "Login successful",
+            "appToken": "jwt_token_here",
+            "user": {}
+          }
+        },
+        {
+          "name": "8.3 Token Verification (Get Current User)",
+          "method": "GET",
+          "url": "/api/auth/me",
+          "auth": true,
+          "headers": {
+            "Authorization": "Bearer YOUR_TOKEN_HERE"
+          },
+          "body": null,
+          "response": {
+            "success": true,
+            "user": {}
+          }
+        },
+        {
+          "name": "8.4 Google OAuth with reCAPTCHA",
+          "method": "POST",
+          "url": "/api/auth/google",
+          "auth": false,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "token": "google-access-token",
+            "recaptchaToken": "recaptcha-response-token"
+          },
+          "response": {
+            "appToken": "jwt_token_here"
+          }
+        },
+        {
+          "name": "8.5 Change Password",
+          "method": "PUT",
+          "url": "/api/auth/change-password",
+          "auth": true,
+          "headers": {
+            "Authorization": "Bearer YOUR_TOKEN_HERE",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "currentPassword": "123456",
+            "newPassword": "newpassword123"
+          },
+          "response": {
+            "success": true,
+            "message": "Password changed successfully"
+          }
+        }
+      ]
+    },
+    "9_EMAIL_NOTIFICATION_MODULE": {
+      "description": "Handles email notifications and password reset",
+      "endpoints": [
+        {
+          "name": "9.1 Forgot Password",
+          "method": "POST",
+          "url": "/api/auth/forgot-password",
+          "auth": false,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "email": "user@test.com"
+          },
+          "note": "Requires SMTP credentials in .env (BREVO_SMTP_USER, BREVO_SMTP_KEY)",
+          "response": {
+            "success": true,
+            "message": "If an account exists with this email, you will receive a password reset link."
+          }
+        },
+        {
+          "name": "9.2 Reset Password",
+          "method": "POST",
+          "url": "/api/auth/reset-password/:token",
+          "auth": false,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "password": "newpassword123"
+          },
+          "response": {
+            "success": true,
+            "message": "Password has been reset successfully. You can now login with your new password."
+          }
+        }
+      ]
+    },
+    "10_FEEDBACK_MODULE": {
+      "description": "Handles customer feedback and reviews",
+      "endpoints": [
+        {
+          "name": "10.1 Submit Feedback",
+          "method": "POST",
+          "url": "/api/feedback/submit",
+          "auth": true,
+          "headers": {
+            "Authorization": "Bearer USER_TOKEN_HERE",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "orderId": "ORDER_ID_HERE",
+            "rating": 5,
+            "feedbackType": "compliment",
+            "message": "Great coffee and fast service!"
+          },
+          "response": {
+            "success": true,
+            "message": "Feedback submitted successfully",
+            "data": {}
+          }
+        },
+        {
+          "name": "10.2 Get My Feedback",
+          "method": "GET",
+          "url": "/api/feedback/my-feedback",
+          "auth": true,
+          "headers": {
+            "Authorization": "Bearer USER_TOKEN_HERE"
+          },
+          "body": null,
+          "response": {
+            "success": true,
+            "data": []
+          }
+        },
+        {
+          "name": "10.3 Get Public Approved Feedback",
+          "method": "GET",
+          "url": "/api/feedback/public/approved",
+          "auth": false,
+          "body": null,
+          "response": {
+            "success": true,
+            "data": []
+          }
+        },
+        {
+          "name": "10.4 Get All Feedback (Admin)",
+          "method": "GET",
+          "url": "/api/feedback/admin/all",
+          "auth": true,
+          "requiresAdmin": true,
+          "headers": {
+            "Authorization": "Bearer ADMIN_TOKEN_HERE"
+          },
+          "body": null,
+          "response": {
+            "success": true,
+            "data": []
+          }
+        },
+        {
+          "name": "10.5 Update Feedback Status (Admin)",
+          "method": "PATCH",
+          "url": "/api/feedback/:feedbackId/status",
+          "auth": true,
+          "requiresAdmin": true,
+          "headers": {
+            "Authorization": "Bearer ADMIN_TOKEN_HERE",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "status": "resolved",
+            "adminNotes": "Issue has been addressed"
+          },
+          "response": {
+            "success": true,
+            "message": "Feedback updated successfully",
+            "data": {}
+          }
+        }
+      ]
+    },
+    "11_BACKUP_MODULE": {
+      "description": "Handles database backup to Google Drive",
+      "endpoints": [
+        {
+          "name": "11.1 Connect to Google Drive",
+          "method": "GET",
+          "url": "/api/backup/connect-drive",
+          "auth": true,
+          "headers": {
+            "Authorization": "Bearer ADMIN_TOKEN_HERE"
+          },
+          "body": null,
+          "response": {
+            "success": true,
+            "authUrl": "https://accounts.google.com/..."
+          }
+        },
+        {
+          "name": "11.2 Check Drive Connection Status",
+          "method": "GET",
+          "url": "/api/backup/drive-status",
+          "auth": true,
+          "headers": {
+            "Authorization": "Bearer ADMIN_TOKEN_HERE"
+          },
+          "body": null,
+          "response": {
+            "success": true,
+            "connected": true
+          }
+        }
+      ]
+    }
+  },
+  "testCredentials": {
+    "admin": {
+      "email": "admin@eriscafe.com",
+      "password": "admin123"
+    },
+    "testUser": {
+      "email": "testuser123@test.com",
+      "password": "123456"
+    }
+  },
+  "commonErrors": {
+    "401_Unauthorized": "Missing or invalid token - Login and add valid token to Authorization header",
+    "403_Forbidden": "Not admin role - Use admin account",
+    "404_Not_Found": "Invalid ID - Check the ID exists",
+    "400_Bad_Request": "Missing fields - Check required fields in body"
+  }
+}

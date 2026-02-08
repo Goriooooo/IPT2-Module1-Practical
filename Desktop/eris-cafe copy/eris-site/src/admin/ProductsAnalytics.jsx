@@ -177,7 +177,7 @@ export default function ProductsAnalytics() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50 p-6">
         <div className="mb-6">
           <div className="h-8 bg-gray-300 rounded w-64 mb-2 animate-pulse"></div>
           <div className="h-4 bg-gray-200 rounded w-96 animate-pulse"></div>
@@ -195,7 +195,7 @@ export default function ProductsAnalytics() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50 p-6">
       <div className="mb-6">
         <button
           onClick={() => navigate('/admin')}
@@ -218,7 +218,7 @@ export default function ProductsAnalytics() {
             <select
               value={timeRange}
               onChange={(e) => setTimeRange(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white/70 backdrop-blur-sm"
             >
               <option value="7days">Last 7 Days</option>
               <option value="30days">Last 30 Days</option>
@@ -228,7 +228,7 @@ export default function ProductsAnalytics() {
             
             <button
               onClick={exportToPDF}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700"
             >
               <Download className="w-4 h-4" />
               Export PDF
@@ -239,9 +239,9 @@ export default function ProductsAnalytics() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="glass-card rounded-2xl p-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-blue-100 rounded-lg">
+            <div className="p-3 bg-blue-100 rounded-xl">
               <Package className="w-6 h-6 text-blue-600" />
             </div>
             <div>
@@ -251,9 +251,9 @@ export default function ProductsAnalytics() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="glass-card rounded-2xl p-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-green-100 rounded-lg">
+            <div className="p-3 bg-green-100 rounded-xl">
               <DollarSign className="w-6 h-6 text-green-600" />
             </div>
             <div>
@@ -263,9 +263,9 @@ export default function ProductsAnalytics() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="glass-card rounded-2xl p-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-purple-100 rounded-lg">
+            <div className="p-3 bg-purple-100 rounded-xl">
               <TrendingUp className="w-6 h-6 text-purple-600" />
             </div>
             <div>
@@ -275,9 +275,9 @@ export default function ProductsAnalytics() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="glass-card rounded-2xl p-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-amber-100 rounded-lg">
+            <div className="p-3 bg-amber-100 rounded-xl">
               <Star className="w-6 h-6 text-amber-600" />
             </div>
             <div>
@@ -291,7 +291,7 @@ export default function ProductsAnalytics() {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Revenue by Product */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="glass-card rounded-2xl p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4">Top 10 Products by Revenue</h2>
           <ResponsiveContainer width="100%" height={350}>
             <BarChart data={productsData.revenueByProduct} layout="vertical">
@@ -305,7 +305,7 @@ export default function ProductsAnalytics() {
         </div>
 
         {/* Category Breakdown */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="glass-card rounded-2xl p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4">Revenue by Category</h2>
           <ResponsiveContainer width="100%" height={350}>
             <PieChart>
@@ -330,23 +330,23 @@ export default function ProductsAnalytics() {
       </div>
 
       {/* Product Performance Table */}
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="glass-card rounded-2xl p-6">
         <h2 className="text-xl font-bold text-gray-800 mb-4">Top 15 Product Performance</h2>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b-2 border-gray-200">
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Rank</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">Product Name</th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-700">Qty Sold</th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-700">Revenue</th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-700">Avg Price</th>
-                <th className="text-right py-3 px-4 font-semibold text-gray-700">Orders</th>
+              <tr className="border-b border-gray-200/30">
+                <th className="text-left py-3 px-4 font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Rank</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Product Name</th>
+                <th className="text-right py-3 px-4 font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Qty Sold</th>
+                <th className="text-right py-3 px-4 font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Revenue</th>
+                <th className="text-right py-3 px-4 font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Avg Price</th>
+                <th className="text-right py-3 px-4 font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Orders</th>
               </tr>
             </thead>
             <tbody>
               {productsData.productPerformance.map((product, index) => (
-                <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                <tr key={index} className="border-b border-gray-200/30 hover:bg-white/50">
                   <td className="py-3 px-4">
                     <span className={`font-bold ${index === 0 ? 'text-yellow-500' : index === 1 ? 'text-gray-400' : index === 2 ? 'text-amber-700' : 'text-blue-600'}`}>
                       #{index + 1}

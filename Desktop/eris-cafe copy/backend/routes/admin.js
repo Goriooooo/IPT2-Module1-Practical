@@ -55,7 +55,7 @@ router.get('/orders', async (req, res) => {
     const skip = (page - 1) * limit;
 
     const orders = await Order.find()
-      .populate('user', 'name email')
+      .populate('userId', 'name email')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -128,7 +128,7 @@ router.get('/reservations', async (req, res) => {
     const skip = (page - 1) * limit;
 
     const reservations = await Reservation.find()
-      .populate('user', 'name email')
+      .populate('userId', 'name email')
       .sort({ date: -1, time: -1 })
       .skip(skip)
       .limit(limit);

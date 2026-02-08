@@ -404,7 +404,7 @@ export default function ReservationsAnalytics() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50 p-6">
         <div className="mb-6">
           <div className="h-8 bg-gray-300 rounded w-64 mb-2 animate-pulse"></div>
           <div className="h-4 bg-gray-200 rounded w-96 animate-pulse"></div>
@@ -423,7 +423,7 @@ export default function ReservationsAnalytics() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50 p-6">
       <div className="mb-6">
         <button
           onClick={() => navigate('/admin')}
@@ -451,7 +451,7 @@ export default function ReservationsAnalytics() {
             <select
               value={timeRange}
               onChange={(e) => setTimeRange(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white/70 backdrop-blur-sm"
             >
               <option value="7days">Last 7 Days</option>
               <option value="30days">Last 30 Days</option>
@@ -467,7 +467,7 @@ export default function ReservationsAnalytics() {
                   type="date"
                   value={customStartDate}
                   onChange={(e) => setCustomStartDate(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 text-sm bg-white/70 backdrop-blur-sm"
                   placeholder="Start Date"
                 />
                 <span className="text-gray-600">to</span>
@@ -475,12 +475,12 @@ export default function ReservationsAnalytics() {
                   type="date"
                   value={customEndDate}
                   onChange={(e) => setCustomEndDate(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 text-sm bg-white/70 backdrop-blur-sm"
                   placeholder="End Date"
                 />
                 <button
                   onClick={fetchReservationsData}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
+                  className="px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 text-sm"
                 >
                   Apply
                 </button>
@@ -489,7 +489,7 @@ export default function ReservationsAnalytics() {
             
             <button
               onClick={exportToPDF}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700"
             >
               <Download className="w-4 h-4" />
               Export PDF
@@ -500,9 +500,9 @@ export default function ReservationsAnalytics() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-6">
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="glass-card rounded-2xl p-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-green-100 rounded-lg">
+            <div className="p-3 bg-green-100 rounded-xl">
               <Calendar className="w-6 h-6 text-green-600" />
             </div>
             <div>
@@ -512,9 +512,9 @@ export default function ReservationsAnalytics() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="glass-card rounded-2xl p-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-indigo-100 rounded-lg">
+            <div className="p-3 bg-indigo-100 rounded-xl">
               <Calendar className="w-6 h-6 text-indigo-600" />
             </div>
             <div>
@@ -524,9 +524,9 @@ export default function ReservationsAnalytics() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="glass-card rounded-2xl p-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-blue-100 rounded-lg">
+            <div className="p-3 bg-blue-100 rounded-xl">
               <TrendingUp className="w-6 h-6 text-blue-600" />
             </div>
             <div>
@@ -536,9 +536,9 @@ export default function ReservationsAnalytics() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="glass-card rounded-2xl p-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-purple-100 rounded-lg">
+            <div className="p-3 bg-purple-100 rounded-xl">
               <Users className="w-6 h-6 text-purple-600" />
             </div>
             <div>
@@ -548,9 +548,9 @@ export default function ReservationsAnalytics() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="glass-card rounded-2xl p-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-amber-100 rounded-lg">
+            <div className="p-3 bg-amber-100 rounded-xl">
               <Clock className="w-6 h-6 text-amber-600" />
             </div>
             <div>
@@ -564,7 +564,7 @@ export default function ReservationsAnalytics() {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Daily Reservations Trend */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="glass-card rounded-2xl p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4">Daily Reservations Trend</h2>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={reservationsData.dailyReservations}>
@@ -581,7 +581,7 @@ export default function ReservationsAnalytics() {
         </div>
 
         {/* Reservations by Status */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="glass-card rounded-2xl p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4">Status Distribution</h2>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
@@ -607,7 +607,7 @@ export default function ReservationsAnalytics() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Reservations by Time */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="glass-card rounded-2xl p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4">Reservations by Time Slot</h2>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={reservationsData.reservationsByTime}>
@@ -622,7 +622,7 @@ export default function ReservationsAnalytics() {
         </div>
 
         {/* Party Size Distribution */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="glass-card rounded-2xl p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4">Party Size Distribution</h2>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={reservationsData.partySizeDistribution}>
@@ -639,25 +639,25 @@ export default function ReservationsAnalytics() {
 
       {/* Monthly Breakdown Section */}
       {reservationsData.monthlyBreakdown.length > 0 && (
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="glass-card rounded-2xl p-6 mb-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4">Monthly Breakdown</h2>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b-2 border-gray-300">
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Month</th>
-                  <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700">Total</th>
-                  <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700">Confirmed</th>
-                  <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700">Cancelled</th>
-                  <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700">Pending</th>
-                  <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700">Customers</th>
-                  <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700">Total Guests</th>
-                  <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700">Avg Party</th>
+                <tr className="border-b border-gray-200/30">
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Month</th>
+                  <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Total</th>
+                  <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Confirmed</th>
+                  <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Cancelled</th>
+                  <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Pending</th>
+                  <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Customers</th>
+                  <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Total Guests</th>
+                  <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Avg Party</th>
                 </tr>
               </thead>
               <tbody>
                 {reservationsData.monthlyBreakdown.map((month, index) => (
-                  <tr key={index} className="border-b hover:bg-gray-50">
+                  <tr key={index} className="border-b border-gray-200/30 hover:bg-white/50">
                     <td className="py-3 px-4">
                       <p className="font-semibold text-gray-900">{month.month}</p>
                     </td>
@@ -728,20 +728,20 @@ export default function ReservationsAnalytics() {
       {/* Customers Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Top Customers in Selected Period */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="glass-card rounded-2xl p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4">Top Customers (Selected Period)</h2>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b">
-                  <th className="text-left py-2 px-2 text-sm font-semibold text-gray-700">Customer</th>
-                  <th className="text-center py-2 px-2 text-sm font-semibold text-gray-700">Reservations</th>
-                  <th className="text-center py-2 px-2 text-sm font-semibold text-gray-700">Total Guests</th>
+                <tr className="border-b border-gray-200/30">
+                  <th className="text-left py-2 px-2 text-sm font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Customer</th>
+                  <th className="text-center py-2 px-2 text-sm font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Reservations</th>
+                  <th className="text-center py-2 px-2 text-sm font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Total Guests</th>
                 </tr>
               </thead>
               <tbody>
                 {reservationsData.topCustomers.slice(0, 10).map((customer, index) => (
-                  <tr key={index} className="border-b hover:bg-gray-50">
+                  <tr key={index} className="border-b border-gray-200/30 hover:bg-white/50">
                     <td className="py-3 px-2">
                       <div>
                         <p className="font-medium text-gray-900 text-sm">{customer.name}</p>
@@ -771,14 +771,14 @@ export default function ReservationsAnalytics() {
         </div>
 
         {/* This Month's Customers */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="glass-card rounded-2xl p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4">
             This Month's Customers ({reservationsData.thisMonthCustomers.length})
           </h2>
           <div className="overflow-x-auto max-h-96 overflow-y-auto">
             <table className="w-full">
-              <thead className="sticky top-0 bg-white">
-                <tr className="border-b">
+              <thead className="sticky top-0 bg-white/70 backdrop-blur-sm">
+                <tr className="border-b border-gray-200/30">
                   <th className="text-left py-2 px-2 text-sm font-semibold text-gray-700">Customer</th>
                   <th className="text-center py-2 px-2 text-sm font-semibold text-gray-700">Reservations</th>
                   <th className="text-center py-2 px-2 text-sm font-semibold text-gray-700">Guests</th>
@@ -786,7 +786,7 @@ export default function ReservationsAnalytics() {
               </thead>
               <tbody>
                 {reservationsData.thisMonthCustomers.map((customer, index) => (
-                  <tr key={index} className="border-b hover:bg-gray-50">
+                  <tr key={index} className="border-b border-gray-200/30 hover:bg-white/50">
                     <td className="py-3 px-2">
                       <div>
                         <p className="font-medium text-gray-900 text-sm">{customer.name}</p>

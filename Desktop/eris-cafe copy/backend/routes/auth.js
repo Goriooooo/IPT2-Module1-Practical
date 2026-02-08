@@ -7,11 +7,17 @@ import User from '../models/User.js';
 import axios from 'axios';
 import { sendPasswordResetEmail, sendPasswordChangeConfirmation } from '../utils/emailService.js';
 import { logLoginAttempt } from '../utils/loginLogger.js';
+import { 
+  loginRateLimiter, 
+  googleLoginRateLimiter, 
+  registerRateLimiter,
+  passwordResetRateLimiter 
+} from '../middleware/rateLimiter.js';
 
 const router = express.Router();
 
-// Google Auth
-router.post('/google', async (req, res) => {
+// Google Auth (with rate limiting)
+router.post('/google', googleLoginRateLimiter, async (req, res) => {
   // We now expect the access token AND the recaptcha token
   const { token, recaptchaToken } = req.body;
 
@@ -113,8 +119,8 @@ router.post('/google', async (req, res) => {
   }
 });
 
-// Manual Registration (Customer Only)
-router.post('/register', async (req, res) => {
+// Manual Registration (Customer Only) - with rate limiting
+router.post('/register', registerRateLimiter, async (req, res) => {
   const { name, email, password } = req.body;
 
   try {
@@ -182,8 +188,8 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Manual Login (Both Admin and Customer)
-router.post('/login', async (req, res) => {
+// Manual Login (Both Admin and Customer) - with rate limiting
+router.post('/login', loginRateLimiter, async (req, res) => {
   const { email, password } = req.body;
 
   try {
@@ -422,8 +428,8 @@ router.put('/change-password', async (req, res) => {
   }
 });
 
-// Forgot Password - Request Reset Token
-router.post('/forgot-password', async (req, res) => {
+// Forgot Password - Request Reset Token (with rate limiting)
+router.post('/forgot-password', passwordResetRateLimiter, async (req, res) => {
   try {
     const { email } = req.body;
 

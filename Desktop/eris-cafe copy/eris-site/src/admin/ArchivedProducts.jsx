@@ -1,15 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ArrowLeft, RotateCcw, Trash2, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import { SkeletonTable } from '../components/SkeletonLoaders';
+import Pagination from '../components/Pagination';
 
 const ArchivedProducts = () => {
   const navigate = useNavigate();
   const [archivedProducts, setArchivedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Fetch archived products
   useEffect(() => {
@@ -109,10 +114,32 @@ const ArchivedProducts = () => {
     product.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Pagination logic
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  
+  const paginatedProducts = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredProducts.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredProducts, currentPage, itemsPerPage]);
+
+  // Reset to first page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handleItemsPerPageChange = (newItemsPerPage) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1);
+  };
+
   if (loading) {
     return (
-      <div>
-        <div className='bg-gradient-to-bl from-[#2E1F1B] via-stone-700 to-[#5E4B43] px-4 md:px-8 pt-8 pb-8'>
+      <div className="min-h-screen bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50">
+        <div className='bg-gradient-to-bl from-[#2E1F1B]/90 via-stone-700/90 to-[#5E4B43]/90 backdrop-blur-sm px-4 md:px-8 pt-8 pb-8'>
           <div className="h-8 bg-white/20 rounded w-96 mb-4 animate-pulse"></div>
           <div className="h-4 bg-white/10 rounded w-48 animate-pulse"></div>
         </div>
@@ -124,27 +151,27 @@ const ArchivedProducts = () => {
   }
 
   return (
-    <div>
+    <div className="min-h-screen bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50">
       {/* Gradient Header */}
-      <div className='bg-gradient-to-bl from-[#2E1F1B] via-stone-700 to-[#5E4B43] px-4 md:px-8 pt-8 pb-8'>
+      <div className='bg-gradient-to-bl from-[#2E1F1B]/90 via-stone-700/90 to-[#5E4B43]/90 backdrop-blur-sm px-4 md:px-8 pt-8 pb-8'>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate('/admin/products')}
-              className="bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg transition-colors"
+              className="bg-white/10 hover:bg-white/20 text-white p-2 rounded-xl transition-colors"
               title="Back to Products"
             >
               <ArrowLeft size={24} />
             </button>
-            <h1 className="text-4xl md:text-5xl font-bold text-[#EDEDE6]">Archived Products</h1>
+            <h1 className="text-4xl md:text-5xl font-bold text-[#EDEDE6] drop-shadow-lg">Archived Products</h1>
           </div>
-          <div className="bg-white/20 text-white px-4 py-2 rounded-lg">
+          <div className="bg-white/20 text-white px-4 py-2 rounded-xl">
             <span className="font-semibold">{archivedProducts.length}</span> archived items
           </div>
         </div>
         <div className="mt-5">
           {/* Search Bar */}
-          <div className="bg-white/70 border border-white rounded-lg shadow-md p-4">
+          <div className="glass-stat rounded-2xl p-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
               <input
@@ -152,7 +179,7 @@ const ArchivedProducts = () => {
                 placeholder="Search archived products..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-600"
               />
             </div>
           </div>
@@ -161,7 +188,7 @@ const ArchivedProducts = () => {
 
       <div className="px-4 md:px-8 py-6 space-y-6">
         {/* Info Banner */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="bg-blue-50/80 backdrop-blur-sm border border-blue-200/50 rounded-2xl p-4">
           <div className="flex items-start gap-3">
             <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
@@ -177,10 +204,10 @@ const ArchivedProducts = () => {
         </div>
 
         {/* Archived Products Table */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        <div className="glass-card rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50">
+              <thead className="bg-white/30 backdrop-blur-sm">
                 <tr>
                   <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Product</th>
                   <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Category</th>
@@ -206,8 +233,8 @@ const ArchivedProducts = () => {
                     </td>
                   </tr>
                 ) : (
-                  filteredProducts.map((product) => (
-                    <tr key={product._id} className="border-b hover:bg-gray-50 transition-colors">
+                  paginatedProducts.map((product) => (
+                    <tr key={product._id} className="border-b border-gray-200/30 hover:bg-white/50 transition-colors">
                       <td className="py-3 px-4">
                         <div className="flex items-center space-x-3">
                           <img 
@@ -243,14 +270,14 @@ const ArchivedProducts = () => {
                         <div className="flex space-x-2">
                           <button 
                             onClick={() => handleRestore(product._id, product.name)}
-                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                            className="p-2 text-green-600 hover:bg-green-50 rounded-xl transition-colors"
                             title="Restore product"
                           >
                             <RotateCcw size={18} />
                           </button>
                           <button 
                             onClick={() => handleDeletePermanently(product._id, product.name)}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-xl transition-colors"
                             title="Delete permanently"
                           >
                             <Trash2 size={18} />
@@ -263,18 +290,30 @@ const ArchivedProducts = () => {
               </tbody>
             </table>
           </div>
+          
+          {/* Pagination */}
+          {filteredProducts.length > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+              itemsPerPage={itemsPerPage}
+              totalItems={filteredProducts.length}
+              onItemsPerPageChange={handleItemsPerPageChange}
+            />
+          )}
         </div>
 
         {/* Statistics */}
         {archivedProducts.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="glass-card rounded-2xl p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600 mb-1">Total Archived</p>
                   <p className="text-3xl font-bold text-gray-800">{archivedProducts.length}</p>
                 </div>
-                <div className="bg-amber-100 p-3 rounded-lg">
+                <div className="bg-amber-100 p-3 rounded-xl">
                   <svg className="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                   </svg>
@@ -282,7 +321,7 @@ const ArchivedProducts = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="glass-card rounded-2xl p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600 mb-1">Total Stock Value</p>
@@ -290,7 +329,7 @@ const ArchivedProducts = () => {
                     {archivedProducts.reduce((sum, p) => sum + p.stock, 0)}
                   </p>
                 </div>
-                <div className="bg-blue-100 p-3 rounded-lg">
+                <div className="bg-blue-100 p-3 rounded-xl">
                   <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                   </svg>
@@ -298,7 +337,7 @@ const ArchivedProducts = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="glass-card rounded-2xl p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600 mb-1">Potential Revenue</p>

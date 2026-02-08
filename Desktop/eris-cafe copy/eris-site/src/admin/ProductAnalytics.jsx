@@ -504,9 +504,9 @@ const ProductAnalytics = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-stone-100">
+      <div className="min-h-screen bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50">
         {/* Header Skeleton */}
-        <div className="bg-gradient-to-r from-[#2E1F1B] via-stone-700 to-[#5E4B43] px-4 md:px-8 pt-8 pb-8">
+        <div className="bg-gradient-to-bl from-[#2E1F1B]/90 via-stone-700/90 to-[#5E4B43]/90 backdrop-blur-sm px-4 md:px-8 pt-8 pb-8">
           <div className="flex items-center justify-between mb-4 animate-pulse">
             <div>
               <div className="h-10 bg-white/20 rounded w-96 mb-2"></div>
@@ -514,7 +514,7 @@ const ProductAnalytics = () => {
             </div>
             <div className="h-10 bg-white/20 rounded w-40"></div>
           </div>
-          <div className="bg-white/20 border border-white backdrop-blur-sm rounded-lg p-4 mt-4 animate-pulse">
+          <div className="glass-stat rounded-2xl p-4 mt-4 animate-pulse">
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
               {[...Array(5)].map((_, i) => (
                 <div key={i}>
@@ -537,24 +537,24 @@ const ProductAnalytics = () => {
   }
 
   return (
-    <div className="min-h-screen bg-stone-100">
+    <div className="min-h-screen bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#2E1F1B] via-stone-700 to-[#5E4B43] px-4 md:px-8 pt-8 pb-8">
+      <div className="bg-gradient-to-bl from-[#2E1F1B]/90 via-stone-700/90 to-[#5E4B43]/90 backdrop-blur-sm px-4 md:px-8 pt-8 pb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-[#EDEDE6] text-3xl md:text-4xl font-bold mb-2">Product Performance Analytics</h1>
+            <h1 className="text-[#EDEDE6] drop-shadow-lg text-3xl md:text-4xl font-bold mb-2">Product Performance Analytics</h1>
             <p className="text-white/90">Analyze best sellers and identify low-performing products for better inventory management</p>
           </div>
           <button
             onClick={() => navigate('/admin')}
-            className="px-4 py-2 bg-white text-amber-600 rounded-lg hover:bg-gray-100 transition font-semibold"
+            className="px-4 py-2 bg-white text-amber-600 rounded-xl hover:bg-gray-100 transition font-semibold"
           >
             Back to Dashboard
           </button>
         </div>
 
         {/* Filters */}
-        <div className="bg-white/20 border border-white backdrop-blur-sm rounded-lg p-4 mt-4">
+        <div className="glass-stat rounded-2xl p-4 mt-4">
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             {/* Date Range Type */}
             <div>
@@ -571,7 +571,7 @@ const ProductAnalytics = () => {
                     setEndDate('');
                   }
                 }}
-                className="w-full px-3 py-2 rounded-lg bg-white/90 text-gray-800 focus:outline-none focus:ring-2 focus:ring-white"
+                className="w-full px-3 py-2 rounded-xl bg-white/90 text-gray-800 focus:outline-none focus:ring-2 focus:ring-white"
               >
                 <option value="7">Last 7 Days</option>
                 <option value="30">Last 30 Days</option>
@@ -594,7 +594,7 @@ const ProductAnalytics = () => {
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
                   max={endDate || new Date().toISOString().split('T')[0]}
-                  className="w-full px-3 py-2 rounded-lg bg-white/90 text-gray-800 focus:outline-none focus:ring-2 focus:ring-white"
+                  className="w-full px-3 py-2 rounded-xl bg-white/90 text-gray-800 focus:outline-none focus:ring-2 focus:ring-white"
                 />
               </div>
             )}
@@ -612,7 +612,7 @@ const ProductAnalytics = () => {
                   onChange={(e) => setEndDate(e.target.value)}
                   min={startDate}
                   max={new Date().toISOString().split('T')[0]}
-                  className="w-full px-3 py-2 rounded-lg bg-white/90 text-gray-800 focus:outline-none focus:ring-2 focus:ring-white"
+                  className="w-full px-3 py-2 rounded-xl bg-white/90 text-gray-800 focus:outline-none focus:ring-2 focus:ring-white"
                 />
               </div>
             )}
@@ -626,7 +626,7 @@ const ProductAnalytics = () => {
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-white/90 text-gray-800 focus:outline-none focus:ring-2 focus:ring-white"
+                className="w-full px-3 py-2 rounded-xl bg-white/90 text-gray-800 focus:outline-none focus:ring-2 focus:ring-white"
               >
                 <option value="all">All Categories</option>
                 {categories.map(cat => (
@@ -644,7 +644,7 @@ const ProductAnalytics = () => {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-white/90 text-gray-800 focus:outline-none focus:ring-2 focus:ring-white"
+                className="w-full px-3 py-2 rounded-xl bg-white/90 text-gray-800 focus:outline-none focus:ring-2 focus:ring-white"
               >
                 <option value="revenue">Revenue</option>
                 <option value="quantity">Quantity Sold</option>
@@ -663,7 +663,7 @@ const ProductAnalytics = () => {
                 value={minSalesFilter}
                 onChange={(e) => setMinSalesFilter(parseInt(e.target.value) || 0)}
                 placeholder="0"
-                className="w-full px-3 py-2 rounded-lg bg-white/90 text-gray-800 focus:outline-none focus:ring-2 focus:ring-white"
+                className="w-full px-3 py-2 rounded-xl bg-white/90 text-gray-800 focus:outline-none focus:ring-2 focus:ring-white"
               />
             </div>
           </div>
@@ -674,9 +674,9 @@ const ProductAnalytics = () => {
       <div className="px-4 md:px-8 py-6 space-y-6">
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-          <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="glass-card rounded-2xl p-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                 <TrendingUp className="text-green-600" size={24} />
               </div>
               <div>
@@ -687,9 +687,9 @@ const ProductAnalytics = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="glass-card rounded-2xl p-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
                 <TrendingDown className="text-red-600" size={24} />
               </div>
               <div>
@@ -700,9 +700,9 @@ const ProductAnalytics = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="glass-card rounded-2xl p-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
                 <Package className="text-blue-600" size={24} />
               </div>
               <div>
@@ -713,9 +713,9 @@ const ProductAnalytics = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="glass-card rounded-2xl p-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
                 <TrendingUp className="text-emerald-600" size={24} />
               </div>
               <div>
@@ -726,9 +726,9 @@ const ProductAnalytics = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="glass-card rounded-2xl p-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
                 <CheckCircle className="text-amber-600" size={24} />
               </div>
               <div>
@@ -741,7 +741,7 @@ const ProductAnalytics = () => {
         </div>
 
         {/* Best Sellers Section */}
-        <div className="bg-white rounded-xl shadow-md overflow-hidden">
+        <div className="glass-card rounded-2xl overflow-hidden">
           <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -754,14 +754,14 @@ const ProductAnalytics = () => {
               <div className="flex gap-2">
                 <button
                   onClick={() => exportBestSellersReport('pdf')}
-                  className="px-4 py-2 bg-white text-green-600 rounded-lg hover:bg-gray-100 transition font-semibold flex items-center gap-2"
+                  className="px-4 py-2 bg-white text-green-600 rounded-xl hover:bg-gray-100 transition font-semibold flex items-center gap-2"
                 >
                   <Download size={18} />
                   PDF
                 </button>
                 <button
                   onClick={() => exportBestSellersReport('csv')}
-                  className="px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition font-semibold flex items-center gap-2"
+                  className="px-4 py-2 bg-white/20 text-white rounded-xl hover:bg-white/30 transition font-semibold flex items-center gap-2"
                 >
                   <Download size={18} />
                   CSV
@@ -780,20 +780,20 @@ const ProductAnalytics = () => {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b-2 border-gray-200">
-                      <th className="text-left py-3 px-4 font-semibold text-gray-700">Product</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-700">Category</th>
-                      <th className="text-center py-3 px-4 font-semibold text-gray-700">Price</th>
-                      <th className="text-center py-3 px-4 font-semibold text-gray-700">Units Sold</th>
-                      <th className="text-center py-3 px-4 font-semibold text-gray-700">Revenue</th>
-                      <th className="text-center py-3 px-4 font-semibold text-gray-700">Profit</th>
-                      <th className="text-center py-3 px-4 font-semibold text-gray-700">Stock</th>
-                      <th className="text-center py-3 px-4 font-semibold text-gray-700">Status</th>
+                    <tr className="border-b border-gray-200/30">
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Product</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Category</th>
+                      <th className="text-center py-3 px-4 font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Price</th>
+                      <th className="text-center py-3 px-4 font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Units Sold</th>
+                      <th className="text-center py-3 px-4 font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Revenue</th>
+                      <th className="text-center py-3 px-4 font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Profit</th>
+                      <th className="text-center py-3 px-4 font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Stock</th>
+                      <th className="text-center py-3 px-4 font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     {bestSellers.map((product) => (
-                      <tr key={product.id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <tr key={product.id} className="border-b border-gray-200/30 hover:bg-white/50">
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-3">
                             {product.image && (
@@ -831,7 +831,7 @@ const ProductAnalytics = () => {
         </div>
 
         {/* Low Performers Section */}
-        <div className="bg-white rounded-xl shadow-md overflow-hidden">
+        <div className="glass-card rounded-2xl overflow-hidden">
           <div className="bg-gradient-to-r from-red-500 to-rose-600 p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -844,14 +844,14 @@ const ProductAnalytics = () => {
               <div className="flex gap-2">
                 <button
                   onClick={() => exportLowPerformersReport('pdf')}
-                  className="px-4 py-2 bg-white text-red-600 rounded-lg hover:bg-gray-100 transition font-semibold flex items-center gap-2"
+                  className="px-4 py-2 bg-white text-red-600 rounded-xl hover:bg-gray-100 transition font-semibold flex items-center gap-2"
                 >
                   <Download size={18} />
                   PDF
                 </button>
                 <button
                   onClick={() => exportLowPerformersReport('csv')}
-                  className="px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition font-semibold flex items-center gap-2"
+                  className="px-4 py-2 bg-white/20 text-white rounded-xl hover:bg-white/30 transition font-semibold flex items-center gap-2"
                 >
                   <Download size={18} />
                   CSV
@@ -870,20 +870,20 @@ const ProductAnalytics = () => {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b-2 border-gray-200">
-                      <th className="text-left py-3 px-4 font-semibold text-gray-700">Product</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-700">Category</th>
-                      <th className="text-center py-3 px-4 font-semibold text-gray-700">Price</th>
-                      <th className="text-center py-3 px-4 font-semibold text-gray-700">Units Sold</th>
-                      <th className="text-center py-3 px-4 font-semibold text-gray-700">Revenue</th>
-                      <th className="text-center py-3 px-4 font-semibold text-gray-700">Stock</th>
-                      <th className="text-center py-3 px-4 font-semibold text-gray-700">Last Sale</th>
-                      <th className="text-center py-3 px-4 font-semibold text-gray-700">Status</th>
+                    <tr className="border-b border-gray-200/30">
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Product</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Category</th>
+                      <th className="text-center py-3 px-4 font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Price</th>
+                      <th className="text-center py-3 px-4 font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Units Sold</th>
+                      <th className="text-center py-3 px-4 font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Revenue</th>
+                      <th className="text-center py-3 px-4 font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Stock</th>
+                      <th className="text-center py-3 px-4 font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Last Sale</th>
+                      <th className="text-center py-3 px-4 font-semibold text-gray-700 bg-white/30 backdrop-blur-sm">Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     {lowPerformers.map((product) => (
-                      <tr key={product.id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <tr key={product.id} className="border-b border-gray-200/30 hover:bg-white/50">
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-3">
                             {product.image && (
@@ -923,7 +923,7 @@ const ProductAnalytics = () => {
         </div>
 
         {/* Export All Button */}
-        <div className="bg-white rounded-xl shadow-md p-6">
+        <div className="glass-card rounded-2xl p-6">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-bold text-gray-800 mb-1">Export Complete Report</h3>
@@ -932,14 +932,14 @@ const ProductAnalytics = () => {
             <div className="flex gap-2">
               <button
                 onClick={() => exportAllProductsReport('pdf')}
-                className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition font-semibold flex items-center gap-2"
+                className="px-4 py-2 bg-amber-600 text-white rounded-xl hover:bg-amber-700 transition font-semibold flex items-center gap-2"
               >
                 <Download size={18} />
                 Export PDF
               </button>
               <button
                 onClick={() => exportAllProductsReport('csv')}
-                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition font-semibold flex items-center gap-2"
+                className="px-4 py-2 bg-gray-600 text-white rounded-xl hover:bg-gray-700 transition font-semibold flex items-center gap-2"
               >
                 <Download size={18} />
                 Export CSV

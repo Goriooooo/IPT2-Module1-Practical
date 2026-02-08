@@ -285,12 +285,12 @@ const AdminProfile = () => {
   };
 
   return (
-    <div>
+    <div className="min-h-screen bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50">
       {/* Header */}
-      <div className='bg-gradient-to-bl from-[#2E1F1B] via-stone-700 to-[#5E4B43] x-4 md:px-8 pt-8 pb-8'>
+      <div className='bg-gradient-to-bl from-[#2E1F1B]/90 via-stone-700/90 to-[#5E4B43]/90 backdrop-blur-sm px-4 md:px-8 pt-8 pb-8'>
         <div className="flex justify-between items-center">
           <div>
-            <h1 className='text-white text-3xl md:text-4xl font-bold mb-2'>Admin Profile</h1>
+            <h1 className='text-white text-3xl md:text-4xl font-bold mb-2 drop-shadow-lg'>Admin Profile</h1>
             <p className='text-white/90'>Manage your account information</p>
           </div>
         </div>
@@ -300,9 +300,9 @@ const AdminProfile = () => {
       <div className="px-4 md:px-8 py-6">
         <div className="max-w-4xl mx-auto">
           {/* Profile Card */}
-          <div className="bg-white rounded-xl shadow-md overflow-hidden">
+          <div className="glass-card rounded-2xl overflow-hidden">
             {/* Profile Header */}
-            <div className="bg-gradient-to-r  from-[#B0CE88] to-stone-600 h-32"></div>
+            <div className="bg-gradient-to-r from-[#B0CE88] to-stone-600 h-32"></div>
             <div className="px-6 pb-6">
               <div className="flex flex-col md:flex-row items-center md:items-end -mt-16 mb-6">
                 <div className="w-32 h-32 rounded-full bg-white p-2 shadow-xl">
@@ -320,7 +320,7 @@ const AdminProfile = () => {
                 </div>
                 <button
                   onClick={() => setIsEditing(!isEditing)}
-                  className="mt-4 md:mt-0 px-6 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition"
+                  className="mt-4 md:mt-0 px-6 py-2 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition"
                 >
                   {isEditing ? 'Cancel' : 'Edit Profile'}
                 </button>
@@ -341,7 +341,7 @@ const AdminProfile = () => {
                       value={formData.name}
                       onChange={handleChange}
                       disabled={!isEditing}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                     />
                   </div>
 
@@ -357,7 +357,7 @@ const AdminProfile = () => {
                       value={formData.email}
                       onChange={handleChange}
                       disabled={!isEditing}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                     />
                   </div>
 
@@ -373,7 +373,7 @@ const AdminProfile = () => {
                       value={formData.phone}
                       onChange={handleChange}
                       disabled={!isEditing}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                     />
                   </div>
 
@@ -389,7 +389,7 @@ const AdminProfile = () => {
                       value={formData.address}
                       onChange={handleChange}
                       disabled={!isEditing}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                     />
                   </div>
                 </div>
@@ -405,7 +405,7 @@ const AdminProfile = () => {
                     onChange={handleChange}
                     disabled={!isEditing}
                     rows="4"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed resize-none"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed resize-none"
                     placeholder="Tell us about yourself..."
                   />
                 </div>
@@ -415,7 +415,7 @@ const AdminProfile = () => {
                   <div className="flex justify-end">
                     <button
                       type="submit"
-                      className="flex items-center gap-2 px-6 py-3 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition font-semibold shadow-lg"
+                      className="flex items-center gap-2 px-6 py-3 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition font-semibold shadow-lg"
                     >
                       <Save size={20} />
                       Save Changes
@@ -428,7 +428,7 @@ const AdminProfile = () => {
 
           {/* Additional Info */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-            <div className="bg-white rounded-xl shadow-md p-6">
+            <div className="glass-card rounded-2xl p-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">Account Status</h3>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-green-500 rounded-full"></div>
@@ -436,12 +436,12 @@ const AdminProfile = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-md p-6">
+            <div className="glass-card rounded-2xl p-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">Last Login</h3>
               <p className="text-gray-600">{new Date().toLocaleString()}</p>
             </div>
 
-            <div className="bg-white rounded-xl shadow-md p-6">
+            <div className="glass-card rounded-2xl p-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">Role</h3>
               <span className="inline-block px-3 py-1 bg-violet-100 text-violet-700 rounded-full text-sm font-semibold capitalize">
                 {userData?.role || 'Admin'}
@@ -450,7 +450,7 @@ const AdminProfile = () => {
           </div>
 
           {/* Backup & Restore Section */}
-          <div className="bg-white rounded-xl shadow-md overflow-hidden mt-6">
+          <div className="glass-card rounded-2xl overflow-hidden mt-6">
             <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
               <h3 className="text-xl font-bold text-white flex items-center gap-2">
                 <Database size={24} />
@@ -461,7 +461,7 @@ const AdminProfile = () => {
 
             <div className="p-6">
               {/* Google Drive Connection Status */}
-              <div className="mb-6 p-4 border rounded-lg bg-gray-50">
+              <div className="mb-6 p-4 border rounded-xl bg-gray-50/50 backdrop-blur-sm">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Cloud size={24} className={driveConnected ? 'text-green-600' : 'text-gray-400'} />
@@ -475,7 +475,7 @@ const AdminProfile = () => {
                   {!driveConnected && (
                     <button
                       onClick={handleConnectDrive}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-semibold"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition text-sm font-semibold"
                     >
                       Connect Drive
                     </button>
@@ -488,7 +488,7 @@ const AdminProfile = () => {
                       </div>
                       <button
                         onClick={handleDisconnectDrive}
-                        className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-sm font-semibold"
+                        className="px-4 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600 transition text-sm font-semibold"
                       >
                         Disconnect
                       </button>
@@ -502,7 +502,7 @@ const AdminProfile = () => {
                 <button
                   onClick={handleBackup}
                   disabled={loadingBackup || !driveConnected}
-                  className="flex items-center justify-center gap-2 px-6 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center gap-2 px-6 py-4 bg-green-600 text-white rounded-xl hover:bg-green-700 transition font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loadingBackup ? (
                     <>
@@ -519,7 +519,7 @@ const AdminProfile = () => {
 
                 <button
                   disabled={loadingRestore || backupHistory.length === 0}
-                  className="flex items-center justify-center gap-2 px-6 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center gap-2 px-6 py-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={() => backupHistory.length > 0 && handleRestore(backupHistory[0].filename)}
                 >
                   {loadingRestore ? (
@@ -554,7 +554,7 @@ const AdminProfile = () => {
                     {backupHistory.map((backup, index) => (
                       <div
                         key={index}
-                        className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition"
+                        className="flex items-center justify-between p-3 border border-gray-200/30 rounded-xl hover:bg-white/50 transition"
                       >
                         <div className="flex items-center gap-3">
                           <Database size={20} className="text-blue-600" />
@@ -594,7 +594,7 @@ const AdminProfile = () => {
               </div>
 
               {/* Warning Message */}
-              <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div className="mt-6 p-4 bg-yellow-50/70 backdrop-blur-sm border border-yellow-200 rounded-xl">
                 <div className="flex items-start gap-3">
                   <svg className="w-5 h-5 text-yellow-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />

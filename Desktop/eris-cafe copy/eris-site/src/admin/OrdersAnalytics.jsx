@@ -180,7 +180,7 @@ export default function OrdersAnalytics() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50 p-6">
         <div className="mb-6">
           <div className="h-8 bg-gray-300 rounded w-64 mb-2 animate-pulse"></div>
           <div className="h-4 bg-gray-200 rounded w-96 animate-pulse"></div>
@@ -198,7 +198,7 @@ export default function OrdersAnalytics() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50 p-6">
       <div className="mb-6">
         <button
           onClick={() => navigate('/admin')}
@@ -221,7 +221,7 @@ export default function OrdersAnalytics() {
             <select
               value={timeRange}
               onChange={(e) => setTimeRange(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white/70 backdrop-blur-sm"
             >
               <option value="7days">Last 7 Days</option>
               <option value="30days">Last 30 Days</option>
@@ -231,7 +231,7 @@ export default function OrdersAnalytics() {
             
             <button
               onClick={exportToPDF}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700"
             >
               <Download className="w-4 h-4" />
               Export PDF
@@ -242,9 +242,9 @@ export default function OrdersAnalytics() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="glass-card rounded-2xl p-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-blue-100 rounded-lg">
+            <div className="p-3 bg-blue-100 rounded-xl">
               <ShoppingCart className="w-6 h-6 text-blue-600" />
             </div>
             <div>
@@ -254,9 +254,9 @@ export default function OrdersAnalytics() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="glass-card rounded-2xl p-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-green-100 rounded-lg">
+            <div className="p-3 bg-green-100 rounded-xl">
               <Package className="w-6 h-6 text-green-600" />
             </div>
             <div>
@@ -266,9 +266,9 @@ export default function OrdersAnalytics() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="glass-card rounded-2xl p-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-red-100 rounded-lg">
+            <div className="p-3 bg-red-100 rounded-xl">
               <TrendingUp className="w-6 h-6 text-red-600" />
             </div>
             <div>
@@ -278,9 +278,9 @@ export default function OrdersAnalytics() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="glass-card rounded-2xl p-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-amber-100 rounded-lg">
+            <div className="p-3 bg-amber-100 rounded-xl">
               <Clock className="w-6 h-6 text-amber-600" />
             </div>
             <div>
@@ -294,7 +294,7 @@ export default function OrdersAnalytics() {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Daily Orders Trend */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="glass-card rounded-2xl p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4">Daily Orders Trend</h2>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={ordersData.dailyOrders}>
@@ -311,7 +311,7 @@ export default function OrdersAnalytics() {
         </div>
 
         {/* Orders by Status */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="glass-card rounded-2xl p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4">Orders by Status</h2>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
@@ -336,7 +336,7 @@ export default function OrdersAnalytics() {
       </div>
 
       {/* Orders by Hour */}
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="glass-card rounded-2xl p-6">
         <h2 className="text-xl font-bold text-gray-800 mb-4">Orders by Hour of Day</h2>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={ordersData.ordersByHour}>

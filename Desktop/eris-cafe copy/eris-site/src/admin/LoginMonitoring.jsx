@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Activity, User, Clock, MapPin, Monitor, RefreshCw, Filter, Download, UserPlus, Trash2, Shield } from 'lucide-react';
 import Swal from 'sweetalert2';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { SkeletonStats, SkeletonTable } from '../components/SkeletonLoaders';
 import { addCSVSignature } from '../utils/pdfExport';
+import Pagination from '../components/Pagination';
 
 const LoginMonitoring = () => {
   const [loginLogs, setLoginLogs] = useState([]);
@@ -15,6 +16,12 @@ const LoginMonitoring = () => {
   const [activeTab, setActiveTab] = useState('logs'); // 'logs' or 'users'
   const [permissions, setPermissions] = useState(null);
   const { userData } = useAuth();
+  // Pagination state for logs
+  const [logsCurrentPage, setLogsCurrentPage] = useState(1);
+  const [logsItemsPerPage, setLogsItemsPerPage] = useState(10);
+  // Pagination state for users
+  const [usersCurrentPage, setUsersCurrentPage] = useState(1);
+  const [usersItemsPerPage, setUsersItemsPerPage] = useState(10);
   const [stats, setStats] = useState({
     totalLogins: 0,
     successfulLogins: 0,
@@ -566,13 +573,50 @@ const LoginMonitoring = () => {
     return colors[role] || colors.unknown;
   };
 
+  // Pagination logic for login logs
+  const logsTotalPages = Math.ceil(loginLogs.length / logsItemsPerPage);
+  const paginatedLogs = useMemo(() => {
+    const startIndex = (logsCurrentPage - 1) * logsItemsPerPage;
+    return loginLogs.slice(startIndex, startIndex + logsItemsPerPage);
+  }, [loginLogs, logsCurrentPage, logsItemsPerPage]);
+
+  // Pagination logic for users
+  const usersTotalPages = Math.ceil(users.length / usersItemsPerPage);
+  const paginatedUsers = useMemo(() => {
+    const startIndex = (usersCurrentPage - 1) * usersItemsPerPage;
+    return users.slice(startIndex, startIndex + usersItemsPerPage);
+  }, [users, usersCurrentPage, usersItemsPerPage]);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setLogsCurrentPage(1);
+  }, [filterRole, filterStatus]);
+
+  const handleLogsPageChange = (page) => {
+    setLogsCurrentPage(page);
+  };
+
+  const handleLogsItemsPerPageChange = (newItemsPerPage) => {
+    setLogsItemsPerPage(newItemsPerPage);
+    setLogsCurrentPage(1);
+  };
+
+  const handleUsersPageChange = (page) => {
+    setUsersCurrentPage(page);
+  };
+
+  const handleUsersItemsPerPageChange = (newItemsPerPage) => {
+    setUsersItemsPerPage(newItemsPerPage);
+    setUsersCurrentPage(1);
+  };
+
   return (
-    <div>
+    <div className="min-h-screen bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50">
       {/* Header */}
-      <div className='bg-gradient-to-bl from-[#2E1F1B] via-stone-700 to-[#5E4B43] px-4 md:px-8 pt-8 pb-8'>
+      <div className='bg-gradient-to-bl from-[#2E1F1B]/90 via-stone-700/90 to-[#5E4B43]/90 backdrop-blur-sm px-4 md:px-8 pt-8 pb-8'>
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className='text-white text-3xl md:text-4xl font-bold mb-2'>Login Monitoring & User Management</h1>
+            <h1 className='text-white drop-shadow-lg text-3xl md:text-4xl font-bold mb-2'>Login Monitoring & User Management</h1>
             <p className='text-white/90'>Track user login activities and manage system users</p>
           </div>
           <div className="flex gap-3">
@@ -580,14 +624,14 @@ const LoginMonitoring = () => {
               <>
                 <button
                   onClick={fetchLoginLogs}
-                  className="flex items-center gap-2 px-4 py-2 bg-white text-violet-600 rounded-lg hover:bg-gray-100 transition font-semibold shadow-lg"
+                  className="flex items-center gap-2 px-4 py-2 bg-white text-violet-600 rounded-xl hover:bg-white/50 transition font-semibold shadow-lg"
                 >
                   <RefreshCw size={18} />
                   Refresh
                 </button>
                 <button
                   onClick={handleExport}
-                  className="flex items-center gap-2 px-4 py-2 bg-white text-violet-600 rounded-lg hover:bg-gray-100 transition font-semibold shadow-lg"
+                  className="flex items-center gap-2 px-4 py-2 bg-white text-violet-600 rounded-xl hover:bg-white/50 transition font-semibold shadow-lg"
                 >
                   <Download size={18} />
                   Export
@@ -598,7 +642,7 @@ const LoginMonitoring = () => {
               <>
                 <button
                   onClick={fetchUsers}
-                  className="flex items-center gap-2 px-4 py-2 bg-white text-violet-600 rounded-lg hover:bg-gray-100 transition font-semibold shadow-lg"
+                  className="flex items-center gap-2 px-4 py-2 bg-white text-violet-600 rounded-xl hover:bg-white/50 transition font-semibold shadow-lg"
                 >
                   <RefreshCw size={18} />
                   Refresh
@@ -606,7 +650,7 @@ const LoginMonitoring = () => {
                 {permissions?.create && (
                   <button
                     onClick={handleAddUser}
-                    className="flex items-center gap-2 px-4 py-2 bg-white text-violet-600 rounded-lg hover:bg-gray-100 transition font-semibold shadow-lg"
+                    className="flex items-center gap-2 px-4 py-2 bg-white text-violet-600 rounded-xl hover:bg-white/50 transition font-semibold shadow-lg"
                   >
                     <UserPlus size={18} />
                     Add User
@@ -624,10 +668,10 @@ const LoginMonitoring = () => {
         <div className="flex gap-4 mb-6">
           <button
             onClick={() => setActiveTab('logs')}
-            className={`px-6 py-3 rounded-lg font-semibold transition-all flex items-center gap-2 ${
+            className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${
               activeTab === 'logs'
                 ? 'bg-stone-600 text-white shadow-lg'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
+                : 'glass-card text-gray-700 hover:bg-white/50'
             }`}
           >
             <Activity size={18} />
@@ -635,10 +679,10 @@ const LoginMonitoring = () => {
           </button>
           <button
             onClick={() => setActiveTab('users')}
-            className={`px-6 py-3 rounded-lg font-semibold transition-all flex items-center gap-2 ${
+            className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${
               activeTab === 'users'
                 ? 'bg-stone-600 text-white shadow-lg'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
+                : 'glass-card text-gray-700 hover:bg-white/50'
             }`}
           >
             <User size={18} />
@@ -650,7 +694,7 @@ const LoginMonitoring = () => {
           <>
             {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="glass-card rounded-2xl p-6">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-semibold text-gray-600">Total Logins</h3>
               <Activity className="text-violet-500" size={24} />
@@ -658,7 +702,7 @@ const LoginMonitoring = () => {
             <p className="text-3xl font-bold text-gray-800">{stats.totalLogins}</p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="glass-card rounded-2xl p-6">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-semibold text-gray-600">Successful</h3>
               <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
@@ -668,7 +712,7 @@ const LoginMonitoring = () => {
             <p className="text-3xl font-bold text-green-600">{stats.successfulLogins}</p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="glass-card rounded-2xl p-6">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-semibold text-gray-600">Failed</h3>
               <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
@@ -678,7 +722,7 @@ const LoginMonitoring = () => {
             <p className="text-3xl font-bold text-red-600">{stats.failedLogins}</p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="glass-card rounded-2xl p-6">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-semibold text-gray-600">Active Users</h3>
               <User className="text-violet-500" size={24} />
@@ -688,7 +732,7 @@ const LoginMonitoring = () => {
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+        <div className="glass-card rounded-2xl p-6 mb-6">
           <div className="flex items-center gap-3 mb-4">
             <Filter size={20} className="text-gray-600" />
             <h3 className="text-lg font-semibold text-gray-800">Filters</h3>
@@ -699,7 +743,7 @@ const LoginMonitoring = () => {
               <select
                 value={filterRole}
                 onChange={(e) => setFilterRole(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent"
               >
                 <option value="all">All Roles</option>
                 <option value="customer">Customer</option>
@@ -713,7 +757,7 @@ const LoginMonitoring = () => {
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent"
               >
                 <option value="all">All Status</option>
                 <option value="success">Success</option>
@@ -724,7 +768,7 @@ const LoginMonitoring = () => {
         </div>
 
         {/* Login Logs Table */}
-        <div className="bg-white rounded-xl shadow-md overflow-hidden">
+        <div className="glass-card rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
             {loading ? (
               <div className="p-6">
@@ -732,7 +776,7 @@ const LoginMonitoring = () => {
               </div>
             ) : (
               <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
+                <thead className="bg-white/30 backdrop-blur-sm border-b border-gray-200/30">
                   <tr>
                     <th className="text-left py-4 px-6 font-semibold text-gray-700">User</th>
                     <th className="text-left py-4 px-6 font-semibold text-gray-700">Role</th>
@@ -743,8 +787,8 @@ const LoginMonitoring = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {loginLogs.map((log, index) => (
-                    <tr key={log._id || index} className="border-b border-gray-100 hover:bg-gray-50 transition">
+                  {paginatedLogs.map((log, index) => (
+                    <tr key={log._id || index} className="border-b border-gray-200/30 hover:bg-white/50 transition">
                       <td className="py-4 px-6">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-gradient-to-br from-[#2E1F1B] via-stone-700 to-[#5E4B43] rounded-full flex items-center justify-center text-white font-semibold">
@@ -794,6 +838,16 @@ const LoginMonitoring = () => {
             )}
           </div>
 
+          {/* Pagination for logs */}
+          <Pagination
+            currentPage={logsCurrentPage}
+            totalPages={logsTotalPages}
+            onPageChange={handleLogsPageChange}
+            itemsPerPage={logsItemsPerPage}
+            totalItems={loginLogs.length}
+            onItemsPerPageChange={handleLogsItemsPerPageChange}
+          />
+
           {loginLogs.length === 0 && !loading && (
             <div className="text-center py-12">
               <Activity size={48} className="mx-auto text-gray-300 mb-4" />
@@ -807,7 +861,7 @@ const LoginMonitoring = () => {
         {activeTab === 'users' && (
           <>
             {/* User Management Table */}
-            <div className="bg-white rounded-xl shadow-md overflow-hidden">
+            <div className="glass-card rounded-2xl overflow-hidden">
               <div className="overflow-x-auto">
                 {loading ? (
                   <div className="flex justify-center items-center h-64">
@@ -815,7 +869,7 @@ const LoginMonitoring = () => {
                   </div>
                 ) : (
                   <table className="w-full">
-                    <thead className="bg-gray-50 border-b border-gray-200">
+                    <thead className="bg-white/30 backdrop-blur-sm border-b border-gray-200/30">
                       <tr>
                         <th className="text-left py-4 px-6 font-semibold text-gray-700">User</th>
                         <th className="text-left py-4 px-6 font-semibold text-gray-700">Role</th>
@@ -825,8 +879,8 @@ const LoginMonitoring = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {users.map((user) => (
-                        <tr key={user._id} className="border-b border-gray-100 hover:bg-gray-50 transition">
+                      {paginatedUsers.map((user) => (
+                        <tr key={user._id} className="border-b border-gray-200/30 hover:bg-white/50 transition">
                           <td className="py-4 px-6">
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 bg-gradient-to-br from-[#2E1F1B] via-stone-700 to-[#5E4B43] rounded-full flex items-center justify-center text-white font-semibold">
@@ -892,6 +946,16 @@ const LoginMonitoring = () => {
                   </table>
                 )}
               </div>
+
+              {/* Pagination for users */}
+              <Pagination
+                currentPage={usersCurrentPage}
+                totalPages={usersTotalPages}
+                onPageChange={handleUsersPageChange}
+                itemsPerPage={usersItemsPerPage}
+                totalItems={users.length}
+                onItemsPerPageChange={handleUsersItemsPerPageChange}
+              />
 
               {users.length === 0 && !loading && (
                 <div className="text-center py-12">

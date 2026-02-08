@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Eye, X, Clock, ChefHat, Package, CheckCircle, GripVertical, LayoutGrid, List, FileDown, FileText, Files } from 'lucide-react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import { generateOrderPDF, generateOrdersReportPDF, generateDetailedOrdersReportPDF } from '../utils/pdfExport';
 import { SkeletonTable, SkeletonKanban } from '../components/SkeletonLoaders';
+import Pagination from '../components/Pagination';
 
 const OrdersPage = () => {
   const [orders, setOrders] = useState([]);
@@ -16,6 +17,9 @@ const OrdersPage = () => {
   const [viewMode, setViewMode] = useState('table'); // 'table' or 'kanban'
   const [draggedOrder, setDraggedOrder] = useState(null);
   const [showExportDropdown, setShowExportDropdown] = useState(false);
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [clearedOrders, setClearedOrders] = useState(() => {
     // Load cleared orders from localStorage on initial render
     const saved = localStorage.getItem('clearedOrders');
@@ -259,6 +263,27 @@ const OrdersPage = () => {
     return matchesSearch && matchesStatus;
   });
 
+  // Pagination logic for table view
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+  const paginatedOrders = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredOrders.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredOrders, currentPage, itemsPerPage]);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterStatus]);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handleItemsPerPageChange = (newItemsPerPage) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1);
+  };
+
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case 'completed': return 'bg-green-100 text-green-800';
@@ -273,9 +298,9 @@ const OrdersPage = () => {
 
   if (loading) {
     return (
-      <div>
+      <div className="min-h-screen bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50">
         {/* Skeleton Header */}
-        <div className='bg-gradient-to-bl from-[#2E1F1B] via-stone-700 to-[#5E4B43] px-4 md:px-8 pt-8 pb-8'>
+        <div className='bg-gradient-to-bl from-[#2E1F1B]/90 via-stone-700/90 to-[#5E4B43]/90 backdrop-blur-sm px-4 md:px-8 pt-8 pb-8'>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-5 animate-pulse">
             <div className="h-12 bg-white/20 rounded w-80"></div>
             <div className="flex items-center gap-4">
@@ -301,7 +326,7 @@ const OrdersPage = () => {
   }
 
   return (
-    <div>
+    <div className="min-h-screen bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50">
       <style>{`
         @keyframes shake {
           0%, 100% { transform: translateX(0) rotate(0deg); }
@@ -313,9 +338,9 @@ const OrdersPage = () => {
         }
       `}</style>
       {/* Gradient Header */}
-      <div className='bg-gradient-to-bl from-[#2E1F1B] via-stone-700 to-[#5E4B43] px-4 md:px-8 pt-8 pb-8'>
+      <div className='bg-gradient-to-bl from-[#2E1F1B]/90 via-stone-700/90 to-[#5E4B43]/90 backdrop-blur-sm px-4 md:px-8 pt-8 pb-8'>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h1 className="text-4xl md:text-5xl font-bold text-[#EDEDE6]">Orders Management</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-[#EDEDE6] drop-shadow-lg">Orders Management</h1>
           
           <div className="flex items-center gap-4">
             {/* Export PDF Dropdown */}
@@ -573,9 +598,9 @@ const OrdersPage = () => {
         </div>
       ) : (
         /* Table View */
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+        <div className="glass-card rounded-2xl overflow-hidden">
+        <table className="min-w-full divide-y divide-gray-200/30">
+          <thead className="bg-white/30 backdrop-blur-sm">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
@@ -585,16 +610,16 @@ const OrdersPage = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredOrders.length === 0 ? (
+          <tbody className="bg-white/50 divide-y divide-gray-200/30">
+            {paginatedOrders.length === 0 ? (
               <tr>
                 <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
                   No orders found
                 </td>
               </tr>
             ) : (
-              filteredOrders.map((order) => (
-                <tr key={order._id} className="hover:bg-gray-50">
+              paginatedOrders.map((order) => (
+                <tr key={order._id} className="hover:bg-white/50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     <div className="flex items-center gap-2">
                       {order.orderId}
@@ -639,13 +664,22 @@ const OrdersPage = () => {
             )}
           </tbody>
         </table>
+        {/* Pagination */}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          itemsPerPage={itemsPerPage}
+          totalItems={filteredOrders.length}
+          onItemsPerPageChange={handleItemsPerPageChange}
+        />
       </div>
       )}
 
       {/* Order Details Modal */}
       {showModal && selectedOrder && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="glass-modal rounded-2xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
               <h2 className="text-2xl font-bold text-gray-800">Order Details</h2>
               <div className="flex items-center gap-3">
@@ -796,8 +830,8 @@ const OrdersPage = () => {
 
       {/* Cleared Orders Modal */}
       {showClearedOrders && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="glass-modal rounded-2xl shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
               <div>
                 <h2 className="text-2xl font-bold text-gray-800">Cleared Orders Archive</h2>
@@ -822,8 +856,8 @@ const OrdersPage = () => {
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                  <table className="min-w-full divide-y divide-gray-200/30">
+                    <thead className="bg-white/30 backdrop-blur-sm">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
@@ -833,9 +867,9 @@ const OrdersPage = () => {
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-white/50 divide-y divide-gray-200/30">
                       {clearedOrders.map((order) => (
-                        <tr key={order._id} className="hover:bg-gray-50">
+                        <tr key={order._id} className="hover:bg-white/50">
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                             {order.orderId}
                           </td>

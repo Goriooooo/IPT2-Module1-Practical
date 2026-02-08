@@ -526,11 +526,11 @@ const COLORS = ['#92400e', '#78350f', '#a16207', '#854d0e', '#713f12', '#57534e'
   };
 
   return (
-    <div className="min-h-screen bg-stone-100"> 
+    <div className="min-h-screen bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50"> 
       {loading ? (
         <>
           {/* Skeleton Loading State */}
-          <div className='bg-gradient-to-bl from-[#2E1F1B] via-stone-700 to-[#5E4B43] px-4 md:px-8 pt-8 pb-8'>
+          <div className='bg-gradient-to-bl from-[#2E1F1B]/90 via-stone-700/90 to-[#5E4B43]/90 backdrop-blur-sm px-4 md:px-8 pt-8 pb-8'>
             <div className="mb-8 animate-pulse">
               <div className="h-12 bg-white/20 rounded w-80 mb-2"></div>
             </div>
@@ -548,18 +548,18 @@ const COLORS = ['#92400e', '#78350f', '#a16207', '#854d0e', '#713f12', '#57534e'
                   <SkeletonChart height={280} />
                   <SkeletonChart height={280} />
                 </div>
-                <div className="bg-white rounded-lg shadow-md p-6 animate-pulse">
-                  <div className="h-6 bg-gray-300 rounded w-48 mb-4"></div>
+                <div className="glass-card rounded-2xl p-6 animate-pulse">
+                  <div className="h-6 bg-gray-300/50 rounded w-48 mb-4"></div>
                   <SkeletonTable rows={5} columns={5} />
                 </div>
               </div>
               <div className="space-y-6">
-                <div className="bg-white rounded-lg shadow-md p-6 animate-pulse">
-                  <div className="h-6 bg-gray-300 rounded w-40 mb-4"></div>
+                <div className="glass-card rounded-2xl p-6 animate-pulse">
+                  <div className="h-6 bg-gray-300/50 rounded w-40 mb-4"></div>
                   <SkeletonList items={5} />
                 </div>
-                <div className="bg-white rounded-lg shadow-md p-6 animate-pulse">
-                  <div className="h-6 bg-gray-300 rounded w-52 mb-4"></div>
+                <div className="glass-card rounded-2xl p-6 animate-pulse">
+                  <div className="h-6 bg-gray-300/50 rounded w-52 mb-4"></div>
                   <SkeletonList items={5} />
                 </div>
               </div>
@@ -569,15 +569,15 @@ const COLORS = ['#92400e', '#78350f', '#a16207', '#854d0e', '#713f12', '#57534e'
       ) : (
         <>
           {/* Gradient Header Section with Stats */}
-          <div className='bg-gradient-to-bl from-[#2E1F1B] via-stone-700 to-[#5E4B43] px-4 md:px-8 pt-8 pb-8'>
+          <div className='bg-gradient-to-bl from-[#2E1F1B]/90 via-stone-700/90 to-[#5E4B43]/90 backdrop-blur-sm px-4 md:px-8 pt-8 pb-8'>
             {/* Header */}
             <div className="mb-8">
-              <h1 className="text-4xl md:text-5xl font-bold text-[#EDEDE6]">Welcome back, Admin!</h1>
+              <h1 className="text-4xl md:text-5xl font-bold text-[#EDEDE6] drop-shadow-lg">Welcome back, Admin!</h1>
             </div>  
             {/* Top Stats Bar - 4 Columns */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {/* Total Revenue */}
-              <div className="bg-white/70 border border-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
+              <div className="glass-stat rounded-2xl p-6 hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <p className="text-sm font-medium text-[#78350f] mb-1">Total Revenue</p>
@@ -588,7 +588,7 @@ const COLORS = ['#92400e', '#78350f', '#a16207', '#854d0e', '#713f12', '#57534e'
               </div>
 
               {/* Total Orders */}
-              <div className="bg-white/70 border border-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
+              <div className="glass-stat rounded-2xl p-6 hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <p className="text-sm font-medium text-[#78350f] mb-1">Total Orders</p>
@@ -599,7 +599,7 @@ const COLORS = ['#92400e', '#78350f', '#a16207', '#854d0e', '#713f12', '#57534e'
               </div>
 
               {/* Total Customers */}
-              <div className="bg-white/70 border border-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
+              <div className="glass-stat rounded-2xl p-6 hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <p className="text-sm font-medium text-[#78350f] mb-1">Total Customers</p>
@@ -610,7 +610,7 @@ const COLORS = ['#92400e', '#78350f', '#a16207', '#854d0e', '#713f12', '#57534e'
               </div>
 
               {/* Pending Orders */}
-              <div className="bg-white/70 border border-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
+              <div className="glass-stat rounded-2xl p-6 hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <p className="text-sm font-medium text-[#78350f] mb-1">Pending Orders</p>
@@ -630,7 +630,7 @@ const COLORS = ['#92400e', '#78350f', '#a16207', '#854d0e', '#713f12', '#57534e'
                 {/* Charts Section - Reorganized for Better Visual Flow */}
             
             {/* Main Revenue Chart - Full Width */}
-            <div className="bg-white rounded-lg shadow-md p-6 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] group relative overflow-visible">
+            <div className="glass-card rounded-2xl p-6 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] group relative overflow-visible">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <TrendingUp className="w-5 h-5 text-blue-600" />
@@ -645,7 +645,7 @@ const COLORS = ['#92400e', '#78350f', '#a16207', '#854d0e', '#713f12', '#57534e'
                           e.stopPropagation();
                           handleExportRevenue('pdf');
                         }}
-                        className="p-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                        className="p-1.5 bg-blue-600/80 backdrop-blur-sm text-white rounded-lg hover:bg-blue-700 transition-colors"
                         title="Export as PDF"
                       >
                         <Download className="w-4 h-4" />
@@ -655,14 +655,14 @@ const COLORS = ['#92400e', '#78350f', '#a16207', '#854d0e', '#713f12', '#57534e'
                           e.stopPropagation();
                           handleExportRevenue('csv');
                         }}
-                        className="p-1.5 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                        className="p-1.5 bg-green-600/80 backdrop-blur-sm text-white rounded-lg hover:bg-green-700 transition-colors"
                         title="Export as CSV"
                       >
                         <Download className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => navigate('/admin/analytics/revenue')}
-                        className="p-1.5 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                        className="p-1.5 bg-gray-600/80 backdrop-blur-sm text-white rounded-lg hover:bg-gray-700 transition-colors"
                         title="View Revenue Analytics"
                       >
                         <ExternalLink className="w-4 h-4" />
@@ -708,7 +708,7 @@ const COLORS = ['#92400e', '#78350f', '#a16207', '#854d0e', '#713f12', '#57534e'
             {/* Two Column Layout for Orders Analysis */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Daily Orders Bar Chart */}
-              <div className="bg-white rounded-lg shadow-md p-6 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] group relative overflow-visible">
+              <div className="glass-card rounded-2xl p-6 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] group relative overflow-visible">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <ShoppingCart className="w-5 h-5 text-blue-600" />
@@ -723,7 +723,7 @@ const COLORS = ['#92400e', '#78350f', '#a16207', '#854d0e', '#713f12', '#57534e'
                             e.stopPropagation();
                             handleExportDailyOrders('pdf');
                           }}
-                          className="p-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                          className="p-1.5 bg-blue-600/80 backdrop-blur-sm text-white rounded-lg hover:bg-blue-700 transition-colors"
                           title="Export as PDF"
                         >
                           <Download className="w-4 h-4" />
@@ -733,14 +733,14 @@ const COLORS = ['#92400e', '#78350f', '#a16207', '#854d0e', '#713f12', '#57534e'
                             e.stopPropagation();
                             handleExportDailyOrders('csv');
                           }}
-                          className="p-1.5 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                          className="p-1.5 bg-green-600/80 backdrop-blur-sm text-white rounded-lg hover:bg-green-700 transition-colors"
                           title="Export as CSV"
                         >
                           <Download className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => navigate('/admin/analytics/orders')}
-                          className="p-1.5 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                          className="p-1.5 bg-gray-600/80 backdrop-blur-sm text-white rounded-lg hover:bg-gray-700 transition-colors"
                           title="View Orders Analytics"
                         >
                           <ExternalLink className="w-4 h-4" />
@@ -780,7 +780,7 @@ const COLORS = ['#92400e', '#78350f', '#a16207', '#854d0e', '#713f12', '#57534e'
               </div>
 
               {/* Orders by Status Pie Chart */}
-              <div className="bg-white rounded-lg shadow-md p-6 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] group relative overflow-visible">
+              <div className="glass-card rounded-2xl p-6 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] group relative overflow-visible">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <ShoppingCart className="w-5 h-5 text-amber-600" />
@@ -795,7 +795,7 @@ const COLORS = ['#92400e', '#78350f', '#a16207', '#854d0e', '#713f12', '#57534e'
                             e.stopPropagation();
                             handleExportOrderStatus('pdf');
                           }}
-                          className="p-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                          className="p-1.5 bg-blue-600/80 backdrop-blur-sm text-white rounded-lg hover:bg-blue-700 transition-colors"
                           title="Export as PDF"
                         >
                           <Download className="w-4 h-4" />
@@ -805,14 +805,14 @@ const COLORS = ['#92400e', '#78350f', '#a16207', '#854d0e', '#713f12', '#57534e'
                             e.stopPropagation();
                             handleExportOrderStatus('csv');
                           }}
-                          className="p-1.5 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                          className="p-1.5 bg-green-600/80 backdrop-blur-sm text-white rounded-lg hover:bg-green-700 transition-colors"
                           title="Export as CSV"
                         >
                           <Download className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => navigate('/admin/analytics/orders')}
-                          className="p-1.5 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                          className="p-1.5 bg-gray-600/80 backdrop-blur-sm text-white rounded-lg hover:bg-gray-700 transition-colors"
                           title="View Orders Analytics"
                         >
                           <ExternalLink className="w-4 h-4" />
@@ -863,7 +863,7 @@ const COLORS = ['#92400e', '#78350f', '#a16207', '#854d0e', '#713f12', '#57534e'
             {/* Two Column Layout for Products & Reservations */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Top Products */}
-              <div className="bg-white rounded-lg shadow-md p-6 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] group relative overflow-visible">
+              <div className="glass-card rounded-2xl p-6 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] group relative overflow-visible">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <Package className="w-5 h-5 text-amber-600" />
@@ -878,7 +878,7 @@ const COLORS = ['#92400e', '#78350f', '#a16207', '#854d0e', '#713f12', '#57534e'
                             e.stopPropagation();
                             handleExportTopProducts('pdf');
                           }}
-                          className="p-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                          className="p-1.5 bg-blue-600/80 backdrop-blur-sm text-white rounded-lg hover:bg-blue-700 transition-colors"
                           title="Export as PDF"
                         >
                           <Download className="w-4 h-4" />
@@ -888,14 +888,14 @@ const COLORS = ['#92400e', '#78350f', '#a16207', '#854d0e', '#713f12', '#57534e'
                             e.stopPropagation();
                             handleExportTopProducts('csv');
                           }}
-                          className="p-1.5 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                          className="p-1.5 bg-green-600/80 backdrop-blur-sm text-white rounded-lg hover:bg-green-700 transition-colors"
                           title="Export as CSV"
                         >
                           <Download className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => navigate('/admin/analytics/products')}
-                          className="p-1.5 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                          className="p-1.5 bg-gray-600/80 backdrop-blur-sm text-white rounded-lg hover:bg-gray-700 transition-colors"
                           title="View Products Analytics"
                         >
                           <ExternalLink className="w-4 h-4" />
@@ -932,7 +932,7 @@ const COLORS = ['#92400e', '#78350f', '#a16207', '#854d0e', '#713f12', '#57534e'
               </div>
 
               {/* Reservations Chart */}
-              <div className="bg-white rounded-lg shadow-md p-6 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] group relative overflow-visible">
+              <div className="glass-card rounded-2xl p-6 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] group relative overflow-visible">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-5 h-5 text-green-600" />
@@ -947,7 +947,7 @@ const COLORS = ['#92400e', '#78350f', '#a16207', '#854d0e', '#713f12', '#57534e'
                             e.stopPropagation();
                             handleExportReservations('pdf');
                           }}
-                          className="p-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                          className="p-1.5 bg-blue-600/80 backdrop-blur-sm text-white rounded-lg hover:bg-blue-700 transition-colors"
                           title="Export as PDF"
                         >
                           <Download className="w-4 h-4" />
@@ -957,14 +957,14 @@ const COLORS = ['#92400e', '#78350f', '#a16207', '#854d0e', '#713f12', '#57534e'
                             e.stopPropagation();
                             handleExportReservations('csv');
                           }}
-                          className="p-1.5 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                          className="p-1.5 bg-green-600/80 backdrop-blur-sm text-white rounded-lg hover:bg-green-700 transition-colors"
                           title="Export as CSV"
                         >
                           <Download className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => navigate('/admin/analytics/reservations')}
-                          className="p-1.5 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                          className="p-1.5 bg-gray-600/80 backdrop-blur-sm text-white rounded-lg hover:bg-gray-700 transition-colors"
                           title="View Reservations Analytics"
                         >
                           <ExternalLink className="w-4 h-4" />
@@ -1005,12 +1005,12 @@ const COLORS = ['#92400e', '#78350f', '#a16207', '#854d0e', '#713f12', '#57534e'
             </div>
 
             {/* Recent Orders */}
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="glass-card rounded-2xl p-6">
               <h2 className="text-xl font-bold text-gray-800 mb-4">Recent Orders</h2>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b">
+                    <tr className="border-b border-gray-200/50">
                       <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Order ID</th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Customer</th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Amount</th>
@@ -1020,16 +1020,16 @@ const COLORS = ['#92400e', '#78350f', '#a16207', '#854d0e', '#713f12', '#57534e'
                   </thead>
                   <tbody>
                     {recentOrders.map((order) => (
-                      <tr key={order.id} className="border-b hover:bg-gray-50 transition-colors">
+                      <tr key={order.id} className="border-b border-gray-200/30 hover:bg-white/50 transition-colors">
                         <td className="py-3 px-4 text-sm text-gray-800">{order.id}</td>
                         <td className="py-3 px-4 text-sm text-gray-800">{order.customer}</td>
                         <td className="py-3 px-4 text-sm text-gray-800">{order.amount}</td>
                         <td className="py-3 px-4">
                           <span className={`
-                            px-2 py-1 text-xs font-semibold rounded-full
-                            ${order.status === 'Completed' ? 'bg-green-100 text-green-800' : ''}
-                            ${order.status === 'Processing' ? 'bg-blue-100 text-blue-800' : ''}
-                            ${order.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : ''}
+                            px-2 py-1 text-xs font-semibold rounded-full backdrop-blur-sm
+                            ${order.status === 'Completed' ? 'bg-green-100/80 text-green-800' : ''}
+                            ${order.status === 'Processing' ? 'bg-blue-100/80 text-blue-800' : ''}
+                            ${order.status === 'Pending' ? 'bg-yellow-100/80 text-yellow-800' : ''}
                           `}>
                             {order.status}
                           </span>
@@ -1046,9 +1046,9 @@ const COLORS = ['#92400e', '#78350f', '#a16207', '#854d0e', '#713f12', '#57534e'
             {/* Right Column - Notifications & Reservations */}
             <div className="space-y-6">
               {/* Notifications */}
-              <div className="bg-white rounded-lg shadow-md overflow-hidden">
+              <div className="glass-card rounded-2xl overflow-hidden">
               {/* Header with Tabs */}
-              <div className="px-6 py-4 bg-gradient-to-r from-[#2E1F1B] via-stone-700 to-[#5E4B43]">
+              <div className="px-6 py-4 bg-gradient-to-r from-[#2E1F1B]/90 via-stone-700/90 to-[#5E4B43]/90 backdrop-blur-sm">
                 <div className="flex items-center gap-2 mb-3">
                   <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
@@ -1254,7 +1254,7 @@ const COLORS = ['#92400e', '#78350f', '#a16207', '#854d0e', '#713f12', '#57534e'
             </div>
 
             {/* Upcoming Reservations */}
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="glass-card rounded-2xl p-6">
               <h2 className="text-xl font-bold text-gray-800 mb-4">Upcoming Reservations</h2>
               <div className="space-y-3">
                 {upcomingReservations.length === 0 ? (
@@ -1266,7 +1266,7 @@ const COLORS = ['#92400e', '#78350f', '#a16207', '#854d0e', '#713f12', '#57534e'
                   </div>
                 ) : (
                   upcomingReservations.map((reservation) => (
-                    <div key={reservation.id} className="border-l-4 border-amber-500 pl-3 py-2">
+                    <div key={reservation.id} className="border-l-4 border-amber-500 pl-3 py-2 bg-white/30 rounded-r-lg">
                       <div className="flex items-start justify-between">
                         <div>
                           <p className="font-medium text-gray-900">{reservation.name}</p>
@@ -1290,7 +1290,7 @@ const COLORS = ['#92400e', '#78350f', '#a16207', '#854d0e', '#713f12', '#57534e'
             </div>
 
               {/* Menu Highlights */}
-              <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="glass-card rounded-2xl p-6">
                 <h2 className="text-xl font-bold text-gray-800 mb-4">Menu Highlights</h2>
                 <p className="text-gray-600 text-sm">Popular items will appear here</p>
               </div>

@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { Search, X, User, ShoppingBag, Calendar, Mail, Phone, MapPin, TrendingUp, Clock } from 'lucide-react';
 import { SkeletonStats, SkeletonTable } from '../components/SkeletonLoaders';
+import Pagination from '../components/Pagination';
 
 export default function Customers() {
   const [customers, setCustomers] = useState([]);
@@ -11,6 +12,9 @@ export default function Customers() {
   const [customerDetails, setCustomerDetails] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [detailsLoading, setDetailsLoading] = useState(false);
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   useEffect(() => {
     fetchCustomers();
@@ -70,6 +74,27 @@ export default function Customers() {
     customer.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Pagination logic
+  const totalPages = Math.ceil(filteredCustomers.length / itemsPerPage);
+  const paginatedCustomers = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredCustomers.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredCustomers, currentPage, itemsPerPage]);
+
+  // Reset to first page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handleItemsPerPageChange = (newItemsPerPage) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1);
+  };
+
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case 'completed':
@@ -86,8 +111,8 @@ export default function Customers() {
 
   if (loading) {
     return (
-      <div>
-        <div className='bg-gradient-to-bl from-[#2E1F1B] via-stone-700 to-[#5E4B43] px-4 md:px-8 pt-8 pb-8'>
+      <div className="min-h-screen bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50">
+        <div className='bg-gradient-to-bl from-[#2E1F1B]/90 via-stone-700/90 to-[#5E4B43]/90 backdrop-blur-sm px-4 md:px-8 pt-8 pb-8'>
           <div className="h-8 bg-white/20 rounded w-96 mb-6 animate-pulse"></div>
           <SkeletonStats />
         </div>
@@ -99,14 +124,14 @@ export default function Customers() {
   }
 
   return (
-    <div>
+    <div className="min-h-screen bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50">
       {/* Gradient Header */}
-      <div className='bg-gradient-to-bl from-[#2E1F1B] via-stone-700 to-[#5E4B43] px-4 md:px-8 pt-8 pb-8'>
+      <div className='bg-gradient-to-bl from-[#2E1F1B]/90 via-stone-700/90 to-[#5E4B43]/90 backdrop-blur-sm px-4 md:px-8 pt-8 pb-8'>
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-[#EDEDE6]">Customer Management</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-[#EDEDE6] drop-shadow-lg">Customer Management</h1>
           <button
             onClick={fetchCustomers}
-            className="px-4 py-3 bg-white/70 border border-white text-[#78350f] rounded-lg hover:bg-gray-100 transition font-semibold shadow-lg"
+            className="px-4 py-3 glass-stat text-[#78350f] rounded-xl hover:bg-white/90 transition font-semibold"
           >
             Refresh
           </button>
@@ -114,11 +139,11 @@ export default function Customers() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white/70 border border-white rounded-lg shadow-md p-4">
+          <div className="glass-stat rounded-2xl p-4 hover:scale-[1.02] transition-all duration-300">
             <p className="text-sm text-gray-600">Total Customers</p>
             <p className="text-2xl font-bold text-gray-800">{customers.length}</p>
           </div>
-          <div className="bg-white/70 border border-white rounded-lg shadow-md p-4">
+          <div className="glass-stat rounded-2xl p-4 hover:scale-[1.02] transition-all duration-300">
             <p className="text-sm text-gray-600">Active This Month</p>
             <p className="text-2xl font-bold text-green-600">
               {customers.filter(c => {
@@ -128,7 +153,7 @@ export default function Customers() {
               }).length}
             </p>
           </div>
-          <div className="bg-white/70 border border-white rounded-lg shadow-md p-4">
+          <div className="glass-stat rounded-2xl p-4 hover:scale-[1.02] transition-all duration-300">
             <p className="text-sm text-gray-600">Total Orders Placed</p>
             <p className="text-2xl font-bold text-blue-600">
               {customers.reduce((sum, c) => sum + (c.orderCount || 0), 0)}
@@ -136,7 +161,7 @@ export default function Customers() {
           </div>
         </div>
          {/* Search Bar */}
-          <div className="bg-white/70 border border-white rounded-lg shadow-md p-4 mt-6">
+          <div className="glass-stat rounded-2xl p-4 mt-6">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
               <input
@@ -144,7 +169,7 @@ export default function Customers() {
                 placeholder="Search customers by name or email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600"
+                className="w-full pl-10 pr-4 py-2 glass-input rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-600"
               />
             </div>
           </div>
@@ -155,10 +180,10 @@ export default function Customers() {
      
 
       {/* Customers Table */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      <div className="glass-card rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50">
+            <thead className="bg-white/30 backdrop-blur-sm">
               <tr>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Customer</th>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Email</th>
@@ -169,15 +194,15 @@ export default function Customers() {
               </tr>
             </thead>
             <tbody>
-              {filteredCustomers.length === 0 ? (
+              {paginatedCustomers.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="text-center py-8 text-gray-500">
                     No customers found
                   </td>
                 </tr>
               ) : (
-                filteredCustomers.map((customer) => (
-                  <tr key={customer._id} className="border-b hover:bg-gray-50 transition-colors">
+                paginatedCustomers.map((customer) => (
+                  <tr key={customer._id} className="border-b border-gray-200/30 hover:bg-white/50 transition-colors">
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-3">
                         {(customer.profilePicture || customer.picture) ? (
@@ -187,7 +212,7 @@ export default function Customers() {
                             className="w-10 h-10 rounded-full object-cover"
                           />
                         ) : (
-                          <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+                          <div className="w-10 h-10 rounded-full bg-amber-100/80 backdrop-blur-sm flex items-center justify-center">
                             <User size={20} className="text-amber-600" />
                           </div>
                         )}
@@ -201,13 +226,13 @@ export default function Customers() {
                     </td>
                     <td className="py-3 px-4 text-sm text-gray-600">{customer.email}</td>
                     <td className="py-3 px-4">
-                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100/80 backdrop-blur-sm text-blue-800 rounded-full text-sm">
                         <ShoppingBag size={14} />
                         {customer.orderCount || 0}
                       </span>
                     </td>
                     <td className="py-3 px-4">
-                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
+                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100/80 backdrop-blur-sm text-purple-800 rounded-full text-sm">
                         <Calendar size={14} />
                         {customer.reservationCount || 0}
                       </span>
@@ -218,7 +243,7 @@ export default function Customers() {
                     <td className="py-3 px-4">
                       <button
                         onClick={() => viewCustomerDetails(customer)}
-                        className="px-3 py-1 text-sm bg-amber-600 text-white rounded hover:bg-amber-700 transition"
+                        className="px-3 py-1 text-sm bg-amber-600/80 backdrop-blur-sm text-white rounded-lg hover:bg-amber-700 transition"
                       >
                         View Details
                       </button>
@@ -228,16 +253,25 @@ export default function Customers() {
               )}
             </tbody>
           </table>
+          {/* Pagination */}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            itemsPerPage={itemsPerPage}
+            totalItems={filteredCustomers.length}
+            onItemsPerPageChange={handleItemsPerPageChange}
+          />
         </div>
       </div>
 
       {/* Customer Details Modal */}
       {showModal && selectedCustomer && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="glass-modal rounded-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               {/* Header */}
-              <div className="flex items-center justify-between mb-6 border-b pb-4">
+              <div className="flex items-center justify-between mb-6 border-b border-gray-200/50 pb-4">
                 <div className="flex items-center gap-4">
                   {(selectedCustomer.profilePicture || selectedCustomer.picture) ? (
                     <img
@@ -246,7 +280,7 @@ export default function Customers() {
                       className="w-16 h-16 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-full bg-amber-100/80 backdrop-blur-sm flex items-center justify-center">
                       <User size={32} className="text-amber-600" />
                     </div>
                   )}
@@ -254,7 +288,7 @@ export default function Customers() {
                     <h2 className="text-2xl font-bold text-gray-800">{selectedCustomer.name}</h2>
                     <p className="text-gray-600">{selectedCustomer.email}</p>
                     {selectedCustomer.googleId && (
-                      <span className="inline-block mt-1 text-xs px-2 py-1 bg-blue-100 text-blue-600 rounded">
+                      <span className="inline-block mt-1 text-xs px-2 py-1 bg-blue-100/80 backdrop-blur-sm text-blue-600 rounded-lg">
                         Google Account
                       </span>
                     )}
@@ -262,7 +296,7 @@ export default function Customers() {
                 </div>
                 <button
                   onClick={closeModal}
-                  className="p-2 hover:bg-gray-100 rounded-full transition"
+                  className="p-2 hover:bg-gray-100/50 rounded-full transition"
                 >
                   <X size={24} />
                 </button>

@@ -42,7 +42,12 @@ const Login = () => {
           navigate(from, { replace: true });
         }
       } else {
-        setError(result.message || 'Login failed. Backend rejected the token.');
+        // Handle rate limit error specifically
+        if (result.retryAfter) {
+          setError(`Too many login attempts. Please try again after ${result.retryAfter} minutes.`);
+        } else {
+          setError(result.message || 'Login failed. Backend rejected the token.');
+        }
         setRecaptchaToken(null);
         recaptchaRef.current?.reset();
       }
@@ -95,7 +100,12 @@ const Login = () => {
         navigate(from, { replace: true });
       }
     } else {
-      setError(result.message);
+      // Handle rate limit error specifically
+      if (result.retryAfter) {
+        setError(`Too many login attempts. Please try again after ${result.retryAfter} minutes.`);
+      } else {
+        setError(result.message);
+      }
     }
   };
 

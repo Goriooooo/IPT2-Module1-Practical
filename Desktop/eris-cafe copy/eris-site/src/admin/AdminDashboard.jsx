@@ -319,8 +319,8 @@ const AdminDashboard = () => {
   // Show loading state while fetching permissions
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-100">
-        <div className="text-center">
+      <div className="flex h-screen items-center justify-center bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50">
+        <div className="text-center glass-card rounded-2xl p-8">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600 mb-4"></div>
           <p className="text-gray-600">Loading dashboard...</p>
         </div>
@@ -329,12 +329,12 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50">
       {/* Sidebar */}
       <aside className={`
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         ${sidebarMinimized ? 'lg:w-20' : 'lg:w-64'}
-        fixed inset-y-0 left-0 z-50 w-64 bg-charcoal text-white transition-all duration-300 ease-in-out
+        fixed inset-y-0 left-0 z-50 w-64 glass-sidebar text-white transition-all duration-300 ease-in-out
         lg:translate-x-0 lg:static lg:inset-0
       `}>
         <div className="flex items-center justify-between p-6 border-b border-gray-700">
@@ -499,7 +499,7 @@ const AdminDashboard = () => {
         </button>
 
         {/* Content Area */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50">
           <Outlet />
         </main>
       </div>

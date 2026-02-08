@@ -16,6 +16,7 @@ import {
   deleteCalendarEvent
 } from '../utils/googleCalendarModern';
 import { SkeletonTable, SkeletonReservation } from '../components/SkeletonLoaders';
+import Pagination from '../components/Pagination';
 
 // Setup the localizer for react-big-calendar
 const locales = {
@@ -41,6 +42,9 @@ const ReservationsPage = () => {
   const [viewMode, setViewMode] = useState('list'); // 'list' or 'calendar'
   const [googleSignedIn, setGoogleSignedIn] = useState(false);
   const [googleCalendarInitialized, setGoogleCalendarInitialized] = useState(false);
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   
   // Calendar state
   const [calendarView, setCalendarView] = useState('month');
@@ -399,6 +403,27 @@ const ReservationsPage = () => {
     return matchesSearch && matchesStatus && matchesDate;
   });
 
+  // Pagination logic for list view
+  const totalPages = Math.ceil(filteredReservations.length / itemsPerPage);
+  const paginatedReservations = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredReservations.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredReservations, currentPage, itemsPerPage]);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterStatus, filterDate]);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handleItemsPerPageChange = (newItemsPerPage) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1);
+  };
+
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case 'confirmed': return 'bg-green-100 text-green-800';
@@ -417,8 +442,8 @@ const ReservationsPage = () => {
 
   if (loading) {
     return (
-      <div>
-        <div className='bg-gradient-to-bl from-[#2E1F1B] via-stone-700 to-[#5E4B43] px-4 md:px-8 pt-8 pb-8'>
+      <div className="min-h-screen bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50">
+        <div className='bg-gradient-to-bl from-[#2E1F1B]/90 via-stone-700/90 to-[#5E4B43]/90 backdrop-blur-sm px-4 md:px-8 pt-8 pb-8'>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-5 animate-pulse">
             <div className="h-12 bg-white/20 rounded w-96"></div>
             <div className="flex items-center gap-4">
@@ -452,11 +477,11 @@ const ReservationsPage = () => {
   }
 
   return (
-    <div>
+    <div className="min-h-screen bg-gradient-to-br from-stone-200 via-stone-100 to-amber-50">
       {/* Gradient Header */}
-      <div className='bg-gradient-to-bl from-[#2E1F1B] via-stone-700 to-[#5E4B43] px-4 md:px-8 pt-8 pb-8'>
+      <div className='bg-gradient-to-bl from-[#2E1F1B]/90 via-stone-700/90 to-[#5E4B43]/90 backdrop-blur-sm px-4 md:px-8 pt-8 pb-8'>
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <h1 className="text-4xl md:text-5xl font-bold text-[#EDEDE6]">Reservations Management</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-[#EDEDE6] drop-shadow-lg">Reservations Management</h1>
           
           <div className="flex items-center gap-4">
             {/* Google Calendar Connection */}
@@ -516,7 +541,7 @@ const ReservationsPage = () => {
         </div>
         <div className="mt-5">
              {/* Filters */}
-              <div className="bg-white/70 border border-white rounded-lg shadow-md p-4">
+              <div className="glass-stat rounded-2xl p-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* Search */}
                   <div className="relative">
@@ -526,7 +551,7 @@ const ReservationsPage = () => {
                       placeholder="Search reservations..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600"
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-600"
                     />
                   </div>
 
@@ -534,7 +559,7 @@ const ReservationsPage = () => {
                   <select
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600"
+                    className="px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-600"
                   >
                     <option value="All">All Status</option>
                     <option value="Confirmed">Confirmed</option>
@@ -551,7 +576,7 @@ const ReservationsPage = () => {
                       type="date"
                       value={filterDate}
                       onChange={(e) => setFilterDate(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600"
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-600"
                     />
                   </div>
                 </div>
@@ -560,23 +585,23 @@ const ReservationsPage = () => {
         <div className="mt-5">
               {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-white/70 border border-white rounded-lg shadow-md p-4">
+            <div className="glass-stat rounded-2xl p-4">
               <p className="text-sm text-gray-600">Total Reservations</p>
               <p className="text-2xl font-bold text-gray-800">{reservations.length}</p>
             </div>
-            <div className="bg-white/70 border border-white rounded-lg shadow-md p-4">
+            <div className="glass-stat rounded-2xl p-4">
               <p className="text-sm text-gray-600">Confirmed</p>
               <p className="text-2xl font-bold text-green-600">
                 {reservations.filter(r => r.status === 'confirmed').length}
               </p>
             </div>
-            <div className="bg-white/70 border border-white rounded-lg shadow-md p-4">
+            <div className="glass-stat rounded-2xl p-4">
               <p className="text-sm text-gray-600">Pending</p>
               <p className="text-2xl font-bold text-yellow-600">
                 {reservations.filter(r => r.status === 'pending').length}
               </p>
             </div>
-            <div className="bg-white/70 border border-white rounded-lg shadow-md p-4">
+            <div className="glass-stat rounded-2xl p-4">
               <p className="text-sm text-gray-600">Completed</p>
               <p className="text-2xl font-bold text-blue-600">
                 {reservations.filter(r => r.status === 'completed').length}
@@ -589,7 +614,7 @@ const ReservationsPage = () => {
       <div className="px-4 md:px-8 py-6 space-y-6">
       {/* Calendar View */}
       {viewMode === 'calendar' ? (
-        <div className="bg-white/70 border border-white rounded-lg shadow-md p-6">
+        <div className="glass-stat rounded-2xl p-6">
             <div className="mb-4 flex items-center justify-between">
             <h2 className="text-xl font-semibold text-gray-800">Reservation Calendar</h2>
             <div className="flex items-center gap-4 text-sm">
@@ -681,10 +706,10 @@ const ReservationsPage = () => {
         <>
          
       {/* Reservations Table */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      <div className="glass-card rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50">
+            <thead className="bg-white/30 backdrop-blur-sm">
               <tr>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Reservation ID</th>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Customer</th>
@@ -697,15 +722,15 @@ const ReservationsPage = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredReservations.length === 0 ? (
+              {paginatedReservations.length === 0 ? (
                 <tr>
                   <td colSpan="8" className="text-center py-8 text-gray-500">
                     No reservations found
                   </td>
                 </tr>
               ) : (
-                filteredReservations.map((reservation) => (
-                  <tr key={reservation._id} className="border-b hover:bg-gray-50 transition-colors">
+                paginatedReservations.map((reservation) => (
+                  <tr key={reservation._id} className="border-b border-gray-200/30 hover:bg-white/50 transition-colors">
                     <td className="py-3 px-4 text-sm font-medium text-gray-800">
                       {reservation.reservationId}
                     </td>
@@ -763,6 +788,15 @@ const ReservationsPage = () => {
               )}
             </tbody>
           </table>
+          {/* Pagination */}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            itemsPerPage={itemsPerPage}
+            totalItems={filteredReservations.length}
+            onItemsPerPageChange={handleItemsPerPageChange}
+          />
         </div>
       </div>
       </>
@@ -770,8 +804,8 @@ const ReservationsPage = () => {
 
       {/* Details Modal */}
       {showModal && selectedReservation && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="glass-modal rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               {/* Header */}
               <div className="flex items-center justify-between mb-6">

@@ -71,8 +71,9 @@ export const AuthProvider = ({ children }) => {
       console.error('Login error:', err);
       // Send the specific error message from the backend
       const message = err.response?.data?.message || 'Login failed';
+      const retryAfter = err.response?.data?.retryAfter || null;
       console.error('Backend Error:', message);
-      return { success: false, message: message };
+      return { success: false, message: message, retryAfter };
     }
   };
 
@@ -92,7 +93,8 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.error('Manual login error:', err);
       const message = err.response?.data?.message || 'Login failed';
-      return { success: false, message };
+      const retryAfter = err.response?.data?.retryAfter || null;
+      return { success: false, message, retryAfter };
     }
   };
 

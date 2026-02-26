@@ -43,7 +43,7 @@ const Home = () => {
     const fetchBestSellers = async () => {
       try {
         // Use the dedicated best-sellers endpoint that calculates from orders
-        const response = await axios.get('http://localhost:4000/api/products/best-sellers?limit=15');
+        const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/products/best-sellers?limit=15`);
         const bestSellers = response.data.data || [];
         console.log('Fetched best sellers:', bestSellers.length);
         setBestSellerProducts(bestSellers);
@@ -60,7 +60,7 @@ const Home = () => {
     const fetchFeedbacks = async () => {
       try {
         // Use public endpoint that returns only approved feedbacks (resolved/reviewed with 4+ stars)
-        const response = await axios.get('http://localhost:4000/api/feedback/public/approved');
+        const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/feedback/public/approved`);
         const feedbackData = response.data.data || [];
         console.log('Fetched public feedbacks:', feedbackData.length);
         setFeedbacks(feedbackData);
@@ -263,7 +263,7 @@ const Home = () => {
                 <div className="relative w-full shadow-lg sm:shadow-2xl rounded-lg overflow-hidden" style={{ paddingBottom: '56.25%' }}>
                   <iframe
                     className="absolute top-0 left-0 w-full h-full rounded-none"
-                    src="https://www.youtube.com/embed/8PMZTn5b3DQ?autoplay=1&mute=1&controls=1&modestbranding=1&rel=0&loop=1&playlist=8PMZTn5b3DQ&vq=hd1080"
+                    src="https://www.youtube.com/embed/8PMZTn5b3DQ?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&loop=1&playlist=8PMZTn5b3DQ&vq=hd1080&showinfo=0&disablekb=1"
                     title="Eris Cafe Experience"
                     frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

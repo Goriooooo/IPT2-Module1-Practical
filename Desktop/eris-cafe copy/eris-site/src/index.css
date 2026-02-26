@@ -2,17 +2,43 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
-/* Fix SweetAlert2 button visibility - Tailwind preflight strips button colors */
-.swal2-confirm,
-.swal2-cancel,
-.swal2-deny {
+/* Fix SweetAlert2 button visibility - Tailwind preflight strips button styles */
+.swal2-styled.swal2-confirm {
+  background-color: #3085d6 !important;
   color: #fff !important;
+  border: none !important;
+  padding: 10px 24px !important;
+  font-size: 1rem !important;
+  border-radius: 5px !important;
+  cursor: pointer !important;
 }
 
-.swal2-confirm:focus,
-.swal2-cancel:focus,
-.swal2-deny:focus {
-  box-shadow: none !important;
+.swal2-styled.swal2-cancel {
+  background-color: #d33 !important;
+  color: #fff !important;
+  border: none !important;
+  padding: 10px 24px !important;
+  font-size: 1rem !important;
+  border-radius: 5px !important;
+  cursor: pointer !important;
+}
+
+.swal2-styled.swal2-deny {
+  background-color: #dd6b55 !important;
+  color: #fff !important;
+  border: none !important;
+  padding: 10px 24px !important;
+  font-size: 1rem !important;
+  border-radius: 5px !important;
+  cursor: pointer !important;
+}
+
+.swal2-styled.swal2-confirm:hover {
+  opacity: 0.9 !important;
+}
+
+.swal2-styled.swal2-cancel:hover {
+  opacity: 0.9 !important;
 }
 
 /* Ensure SweetAlert2 popup is above everything */

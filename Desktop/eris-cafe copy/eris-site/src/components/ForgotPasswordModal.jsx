@@ -28,18 +28,18 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:4000/api/auth/forgot-password', {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/auth/forgot-password`, {
         email
       });
 
       if (response.data.success) {
         setSuccess(true);
-        setEmail('');
         
         // Auto-close after 5 seconds
         setTimeout(() => {
           onClose();
           setSuccess(false);
+          setEmail('');
         }, 5000);
       }
     } catch (err) {

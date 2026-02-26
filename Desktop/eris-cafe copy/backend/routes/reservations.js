@@ -57,6 +57,33 @@ router.post('/create', authMiddleware, async (req, res) => {
       });
     }
 
+    // Validate phone number
+    if (!customerInfo.phone || customerInfo.phone.trim() === '' || customerInfo.phone === 'N/A') {
+      await session.abortTransaction();
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Phone number is required' 
+      });
+    }
+
+    const phoneDigits = customerInfo.phone.replace(/\D/g, '');
+    const phoneRegex = /^[+]?[\d\s()-]{7,15}$/;
+    if (!phoneRegex.test(customerInfo.phone.trim())) {
+      await session.abortTransaction();
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid phone number format. Please enter a valid phone number.' 
+      });
+    }
+
+    if (phoneDigits.length < 10) {
+      await session.abortTransaction();
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Phone number must have at least 10 digits.' 
+      });
+    }
+
     // Normalize date and time for comparison
     // Parse date string directly to avoid timezone issues
     const dateParts = date.split('-');

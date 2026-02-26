@@ -16,6 +16,7 @@ const Reservation = () => {
     { id: 5, occupied: false },
   ]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   
   const [showModal, setShowModal] = useState(false);
   const [selectedTable, setSelectedTable] = useState(null);
@@ -46,15 +47,28 @@ const Reservation = () => {
     fetchTableOccupancy();
   }, []);
 
-  const fetchTableOccupancy = async () => {
+  const fetchTableOccupancy = async (isRefresh = false) => {
     try {
+      if (isRefresh) setRefreshing(true);
+      
       const token = localStorage.getItem('appToken');
       if (!token) {
         setLoading(false);
+        if (isRefresh) {
+          setRefreshing(false);
+          Swal.fire({
+            title: 'Sign In Required',
+            text: 'Please sign in to refresh table availability.',
+            icon: 'info',
+            confirmButtonColor: '#78350f',
+            timer: 2000,
+            showConfirmButton: false
+          });
+        }
         return;
       }
 
-      const response = await axios.get('http://localhost:4000/api/reservations/admin/all', {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/reservations/admin/all`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -123,9 +137,31 @@ const Reservation = () => {
         );
       }
       setLoading(false);
+      if (isRefresh) {
+        setRefreshing(false);
+        Swal.fire({
+          title: 'Refreshed!',
+          text: 'Table availability has been updated.',
+          icon: 'success',
+          confirmButtonColor: '#78350f',
+          timer: 1500,
+          showConfirmButton: false
+        });
+      }
     } catch (error) {
       console.error('Error fetching table occupancy:', error);
       setLoading(false);
+      if (isRefresh) {
+        setRefreshing(false);
+        Swal.fire({
+          title: 'Refresh Failed',
+          text: 'Could not refresh table availability. Please try again.',
+          icon: 'error',
+          confirmButtonColor: '#78350f',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      }
     }
   };
 
@@ -167,6 +203,43 @@ const Reservation = () => {
         title: 'Missing Information',
         text: 'Please fill in all required fields and select a table',
         icon: 'warning',
+        confirmButtonColor: '#78350f'
+      });
+      return;
+    }
+
+    // Validate phone number
+    const phoneValue = formData.phone || user?.phone || '';
+    const digitsOnly = phoneValue.replace(/\D/g, '');
+    
+    if (!phoneValue || phoneValue.trim() === '') {
+      await Swal.fire({
+        title: 'Phone Number Required',
+        text: 'Please enter a valid phone number.',
+        icon: 'warning',
+        confirmButtonColor: '#78350f'
+      });
+      return;
+    }
+
+    // Check for valid phone format (digits, spaces, dashes, plus, parentheses)
+    const phoneRegex = /^[+]?[\d\s()-]{7,15}$/;
+    if (!phoneRegex.test(phoneValue.trim())) {
+      await Swal.fire({
+        title: 'Invalid Phone Format',
+        text: 'Please enter a valid phone number (e.g., +63 912 345 6789).',
+        icon: 'error',
+        confirmButtonColor: '#78350f'
+      });
+      return;
+    }
+
+    // Check minimum digit count (at least 10 digits for a valid phone number)
+    if (digitsOnly.length < 10) {
+      await Swal.fire({
+        title: 'Phone Number Too Short',
+        text: 'Phone number must have at least 10 digits.',
+        icon: 'error',
         confirmButtonColor: '#78350f'
       });
       return;
@@ -233,7 +306,7 @@ const Reservation = () => {
         tableId: selectedTable.id // Store which table was selected
       };
 
-      const response = await axios.post('http://localhost:4000/api/reservations/create', 
+      const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/reservations/create`, 
         reservationData,
         {
           headers: {
@@ -376,11 +449,12 @@ const Reservation = () => {
             Seat Reservation
           </h1>
           <button
-            onClick={fetchTableOccupancy}
-            className="ml-4 p-2 hover:bg-gray-200 rounded-full transition-colors"
+            onClick={() => fetchTableOccupancy(true)}
+            disabled={refreshing}
+            className="ml-4 p-2 hover:bg-gray-200 rounded-full transition-colors disabled:opacity-50"
             title="Refresh table status"
           >
-            <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className={`w-5 h-5 sm:w-6 sm:h-6 ${refreshing ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
           </button>

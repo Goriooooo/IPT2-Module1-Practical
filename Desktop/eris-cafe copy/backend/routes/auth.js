@@ -169,6 +169,7 @@ router.post('/register', registerRateLimiter, async (req, res) => {
     );
 
     res.status(201).json({ 
+      success: true,
       message: 'Registration successful',
       appToken,
       user: {
@@ -440,11 +441,11 @@ router.post('/forgot-password', passwordResetRateLimiter, async (req, res) => {
     // Find user by email
     const user = await User.findOne({ email });
     
-    // Always return success message to prevent email enumeration
+    // Return error for unregistered emails
     if (!user) {
-      return res.json({
-        success: true,
-        message: 'If an account exists with this email, you will receive a password reset link.'
+      return res.status(404).json({
+        success: false,
+        message: 'No account found with this email address.'
       });
     }
 

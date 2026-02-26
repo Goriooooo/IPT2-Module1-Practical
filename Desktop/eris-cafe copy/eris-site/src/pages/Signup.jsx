@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 import erislogo from '../assets/ERISPNG.png';
 
 const Signup = () => {
@@ -60,16 +61,14 @@ const Signup = () => {
     setError('');
 
     try {
-      const response = await axios.post('http://localhost:4000/api/auth/register', {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/auth/register`, {
         name: formData.name,
         email: formData.email,
         password: formData.password,
         phone: formData.phone
       });
 
-      if (response.data.success) {
-        // Show success message and redirect to login
-        console.error('Full error:', error);
+      if (response.data.success || response.data.appToken) {
         await Swal.fire({
           title: 'Account Created!',
           text: 'Your account has been created successfully! Please log in.',
@@ -78,6 +77,7 @@ const Signup = () => {
         });
         navigate('/login');
       } else {
+        setError('Registration failed. Please try again.');
       }
     } catch (error) {
       setError(error.response?.data?.message || 'Registration failed. Please try again.');

@@ -53,11 +53,11 @@ export default function DashboardHome() {
         };
 
         // Fetch orders
-        const ordersResponse = await axios.get('http://localhost:4000/api/orders/admin/all', config);
+        const ordersResponse = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/orders/admin/all`, config);
         const orders = ordersResponse.data.data || [];
 
         // Fetch reservations
-        const reservationsResponse = await axios.get('http://localhost:4000/api/reservations/admin/all', config);
+        const reservationsResponse = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/reservations/admin/all`, config);
         const reservations = reservationsResponse.data.data || [];
 
         // Process orders for recent orders list (last 5)

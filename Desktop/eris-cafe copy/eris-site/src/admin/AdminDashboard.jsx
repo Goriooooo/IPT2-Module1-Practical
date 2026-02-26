@@ -50,7 +50,7 @@ const AdminDashboard = () => {
       try {
         const token = localStorage.getItem('appToken');
         const response = await axios.get(
-          `http://localhost:4000/api/admin/permissions/${userRole}`,
+          `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/admin/permissions/${userRole}`,
           {
             headers: { Authorization: `Bearer ${token}` }
           }
@@ -151,8 +151,8 @@ const AdminDashboard = () => {
         const config = { headers: { Authorization: `Bearer ${token}` } };
 
         const [ordersRes, reservationsRes] = await Promise.all([
-          axios.get('http://localhost:4000/api/orders/admin/all', config),
-          axios.get('http://localhost:4000/api/reservations/admin/all', config)
+          axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/orders/admin/all`, config),
+          axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/reservations/admin/all`, config)
         ]);
 
         const orders = ordersRes.data.data || [];

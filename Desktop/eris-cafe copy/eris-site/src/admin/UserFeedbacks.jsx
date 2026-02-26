@@ -30,7 +30,7 @@ const UserFeedbacks = () => {
         headers: { 'Authorization': `Bearer ${token}` }
       };
 
-      const response = await axios.get('http://localhost:4000/api/feedback/admin/all', config);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/feedback/admin/all`, config);
       setFeedbacks(response.data.data || []);
       setLoading(false);
     } catch (error) {
@@ -46,7 +46,7 @@ const UserFeedbacks = () => {
         headers: { 'Authorization': `Bearer ${token}` }
       };
 
-      const response = await axios.get('http://localhost:4000/api/feedback/admin/stats', config);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/feedback/admin/stats`, config);
       setStats(response.data.data || null);
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -57,7 +57,7 @@ const UserFeedbacks = () => {
     try {
       const token = localStorage.getItem('appToken');
       await axios.patch(
-        `http://localhost:4000/api/feedback/${feedbackId}/status`,
+        `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/feedback/${feedbackId}/status`,
         { status, adminNotes },
         { headers: { 'Authorization': `Bearer ${token}` } }
       );
@@ -98,7 +98,7 @@ const UserFeedbacks = () => {
     if (result.isConfirmed) {
       try {
         const token = localStorage.getItem('appToken');
-        await axios.delete(`http://localhost:4000/api/feedback/${feedbackId}`, {
+        await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/feedback/${feedbackId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
 

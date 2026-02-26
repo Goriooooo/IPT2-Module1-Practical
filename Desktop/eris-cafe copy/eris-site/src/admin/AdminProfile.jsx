@@ -30,7 +30,7 @@ const AdminProfile = () => {
   const fetchBackupHistory = async () => {
     try {
       const token = localStorage.getItem('appToken');
-      const response = await axios.get('http://localhost:4000/api/backup/history', {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/backup/history`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       setBackupHistory(response.data.backups || []);
@@ -42,7 +42,7 @@ const AdminProfile = () => {
   const checkDriveConnection = async () => {
     try {
       const token = localStorage.getItem('appToken');
-      const response = await axios.get('http://localhost:4000/api/backup/drive-status', {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/backup/drive-status`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       setDriveConnected(response.data.connected || false);
@@ -68,7 +68,7 @@ const AdminProfile = () => {
         setLoadingBackup(true);
         const token = localStorage.getItem('appToken');
         const response = await axios.post(
-          'http://localhost:4000/api/backup/create',
+          `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/backup/create`,
           {},
           {
             headers: { 'Authorization': `Bearer ${token}` }
@@ -114,7 +114,7 @@ const AdminProfile = () => {
         setLoadingRestore(true);
         const token = localStorage.getItem('appToken');
         await axios.post(
-          'http://localhost:4000/api/backup/restore',
+          `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/backup/restore`,
           { filename: backupFile },
           {
             headers: { 'Authorization': `Bearer ${token}` }
@@ -147,7 +147,7 @@ const AdminProfile = () => {
   const handleConnectDrive = async () => {
     try {
       const token = localStorage.getItem('appToken');
-      const response = await axios.get('http://localhost:4000/api/backup/connect-drive', {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/backup/connect-drive`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -193,7 +193,7 @@ const AdminProfile = () => {
     if (result.isConfirmed) {
       try {
         const token = localStorage.getItem('appToken');
-        await axios.post('http://localhost:4000/api/backup/disconnect-drive', {}, {
+        await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/backup/disconnect-drive`, {}, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
 
@@ -233,7 +233,7 @@ const AdminProfile = () => {
         setLoadingDelete(backupFile);
         const token = localStorage.getItem('appToken');
         await axios.delete(
-          `http://localhost:4000/api/backup/${encodeURIComponent(backupFile)}`,
+          `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/backup/${encodeURIComponent(backupFile)}`,
           {
             headers: { 'Authorization': `Bearer ${token}` }
           }

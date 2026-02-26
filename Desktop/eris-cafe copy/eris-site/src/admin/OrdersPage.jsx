@@ -53,7 +53,7 @@ const OrdersPage = () => {
         }
       };
 
-      const response = await axios.get('http://localhost:4000/api/orders/admin/all', config);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/orders/admin/all`, config);
       setOrders(response.data.data || []);
       setLoading(false);
     } catch (error) {
@@ -72,7 +72,7 @@ const OrdersPage = () => {
         }
       };
 
-      await axios.patch(`http://localhost:4000/api/orders/${orderId}/status`, { status: newStatus }, config);
+      await axios.patch(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/orders/${orderId}/status`, { status: newStatus }, config);
       await fetchOrders();
 
       // Update selected order if it's the one being modified
@@ -115,7 +115,7 @@ const OrdersPage = () => {
       } else {
         // Reject cancellation - remove the cancel request flag
         await axios.patch(
-          `http://localhost:4000/api/orders/${orderId}/reject-cancel`,
+          `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/orders/${orderId}/reject-cancel`,
           {},
           config
         );

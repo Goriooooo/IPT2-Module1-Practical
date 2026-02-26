@@ -36,7 +36,7 @@ const LoginMonitoring = () => {
         const token = localStorage.getItem('appToken');
         const userRole = userData?.role || 'staff';
         const response = await axios.get(
-          `http://localhost:4000/api/admin/permissions/${userRole}`,
+          `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/admin/permissions/${userRole}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         if (response.data.success) {
@@ -62,7 +62,7 @@ const LoginMonitoring = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('appToken');
-      const response = await axios.get('http://localhost:4000/api/admin/login-logs', {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/admin/login-logs`, {
         headers: { 'Authorization': `Bearer ${token}` },
         params: { role: filterRole, status: filterStatus, limit: 100 }
       });
@@ -88,7 +88,7 @@ const LoginMonitoring = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('appToken');
-      const response = await axios.get('http://localhost:4000/api/admin/all-users', {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/admin/all-users`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -206,7 +206,7 @@ const LoginMonitoring = () => {
       try {
         const token = localStorage.getItem('appToken');
         const response = await axios.post(
-          'http://localhost:4000/api/admin/users/add',
+          `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/admin/users/add`,
           formValues,
           { headers: { 'Authorization': `Bearer ${token}` } }
         );
@@ -296,7 +296,7 @@ const LoginMonitoring = () => {
       try {
         const token = localStorage.getItem('appToken');
         const response = await axios.delete(
-          `http://localhost:4000/api/admin/users/${userId}`,
+          `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/admin/users/${userId}`,
           {
             headers: { 'Authorization': `Bearer ${token}` },
             data: { adminPassword: result.value.adminPassword }
@@ -395,7 +395,7 @@ const LoginMonitoring = () => {
       try {
         const token = localStorage.getItem('appToken');
         const response = await axios.put(
-          `http://localhost:4000/api/admin/users/${userId}/role`,
+          `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/admin/users/${userId}/role`,
           result.value,
           { headers: { 'Authorization': `Bearer ${token}` } }
         );
@@ -497,7 +497,7 @@ const LoginMonitoring = () => {
       try {
         const token = localStorage.getItem('appToken');
         const response = await axios.put(
-          `http://localhost:4000/api/admin/users/${userId}/password`,
+          `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/admin/users/${userId}/password`,
           result.value,
           { headers: { 'Authorization': `Bearer ${token}` } }
         );

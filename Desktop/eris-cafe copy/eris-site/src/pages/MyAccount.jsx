@@ -125,7 +125,7 @@ const MyAccount = () => {
 
     try {
       const response = await axios.post(
-        'http://localhost:4000/api/upload/image',
+        `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/upload/image`,
         uploadFormData,
         {
           headers: {
@@ -176,7 +176,7 @@ const MyAccount = () => {
 
       const token = localStorage.getItem('appToken');
       const response = await axios.put(
-        'http://localhost:4000/api/auth/update-profile',
+        `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/auth/update-profile`,
         { ...formData, profilePicture: imageUrl },
         {
           headers: {
@@ -273,7 +273,7 @@ const MyAccount = () => {
     try {
       const token = localStorage.getItem('appToken');
       const response = await axios.put(
-        'http://localhost:4000/api/auth/change-password',
+        `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/auth/change-password`,
         {
           currentPassword: passwordData.currentPassword,
           newPassword: passwordData.newPassword

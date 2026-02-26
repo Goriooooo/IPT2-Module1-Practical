@@ -38,8 +38,8 @@ export default function ProductsAnalytics() {
       const config = { headers: { 'Authorization': `Bearer ${token}` } };
 
       const [ordersResponse, productsResponse] = await Promise.all([
-        axios.get('http://localhost:4000/api/orders/admin/all', config),
-        axios.get('http://localhost:4000/api/products', config)
+        axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/orders/admin/all`, config),
+        axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/products`, config)
       ]);
 
       const orders = ordersResponse.data.data || [];

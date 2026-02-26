@@ -45,7 +45,7 @@ export default function ReservationsAnalytics() {
       const token = localStorage.getItem('appToken');
       const config = { headers: { 'Authorization': `Bearer ${token}` } };
 
-      const reservationsResponse = await axios.get('http://localhost:4000/api/reservations/admin/all', config);
+      const reservationsResponse = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/reservations/admin/all`, config);
       const reservations = reservationsResponse.data.data || [];
 
       const now = new Date();

@@ -19,10 +19,10 @@ const RoleAccessControl = () => {
       try {
         const token = localStorage.getItem('appToken');
         const [permissionsResponse, usersResponse] = await Promise.all([
-          axios.get('http://localhost:4000/api/admin/role-permissions', {
+          axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/admin/role-permissions`, {
             headers: { Authorization: `Bearer ${token}` }
           }),
-          axios.get('http://localhost:4000/api/admin/all-users', {
+          axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/admin/all-users`, {
             headers: { Authorization: `Bearer ${token}` }
           })
         ]);
@@ -140,7 +140,7 @@ const RoleAccessControl = () => {
     try {
       const token = localStorage.getItem('appToken');
       const response = await axios.put(
-        `http://localhost:4000/api/admin/role-permissions/${role.roleKey}`,
+        `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/admin/role-permissions/${role.roleKey}`,
         {
           permissions: tempPermissions,
           adminPassword

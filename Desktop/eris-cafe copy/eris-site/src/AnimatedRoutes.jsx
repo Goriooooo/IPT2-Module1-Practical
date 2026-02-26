@@ -34,7 +34,7 @@ import ProductsAnalytics from './admin/ProductsAnalytics'
 import ReservationsAnalytics from './admin/ReservationsAnalytics'
 import ProductAnalytics from './admin/ProductAnalytics'
 import ArchivedProducts from './admin/ArchivedProducts'
-import Status from "./pages/status"
+import Status from "./pages/Status"
 import ProtectedRoute from './components/ProtectedRoute'
 import { AnimatePresence } from 'framer-motion'
 

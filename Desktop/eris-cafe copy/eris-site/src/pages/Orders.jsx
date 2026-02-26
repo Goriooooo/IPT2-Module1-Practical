@@ -42,17 +42,17 @@ const Orders = () => {
       };
       
       // Fetch orders
-      const ordersResponse = await axios.get('http://localhost:4000/api/orders/my-orders', config);
+      const ordersResponse = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/orders/my-orders`, config);
       setOrders(ordersResponse.data.data || []);
       
       // Fetch reservations
-      const reservationsResponse = await axios.get('http://localhost:4000/api/reservations/my-reservations', config);
+      const reservationsResponse = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/reservations/my-reservations`, config);
       const fetchedReservations = reservationsResponse.data.data || [];
       setReservations(fetchedReservations);
       
       // Fetch notifications from backend
       try {
-        const notificationsResponse = await axios.get('http://localhost:4000/api/notifications/my-notifications', config);
+        const notificationsResponse = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/notifications/my-notifications`, config);
         const backendNotifications = notificationsResponse.data.data || [];
         setNotifications(backendNotifications);
         const unread = backendNotifications.filter(n => !n.read).length;
@@ -74,7 +74,7 @@ const Orders = () => {
     try {
       const token = localStorage.getItem('appToken');
       await axios.patch(
-        `http://localhost:4000/api/notifications/${notificationId}/read`,
+        `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/notifications/${notificationId}/read`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -93,7 +93,7 @@ const Orders = () => {
     try {
       const token = localStorage.getItem('appToken');
       await axios.patch(
-        'http://localhost:4000/api/notifications/mark-all-read',
+        `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/notifications/mark-all-read`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -110,7 +110,7 @@ const Orders = () => {
     try {
       const token = localStorage.getItem('appToken');
       await axios.delete(
-        'http://localhost:4000/api/notifications/clear-all',
+        `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/notifications/clear-all`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
@@ -189,7 +189,7 @@ const Orders = () => {
     if (result.isConfirmed) {
       try {
         const token = localStorage.getItem('appToken');
-        await axios.delete(`http://localhost:4000/api/reservations/${reservationId}`, {
+        await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/reservations/${reservationId}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -230,7 +230,7 @@ const Orders = () => {
     if (result.isConfirmed) {
       try {
         const token = localStorage.getItem('appToken');
-        await axios.post(`http://localhost:4000/api/orders/${orderId}/cancel-request`, {}, {
+        await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/orders/${orderId}/cancel-request`, {}, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -288,7 +288,7 @@ const Orders = () => {
 
     try {
       const token = localStorage.getItem('appToken');
-      await axios.post('http://localhost:4000/api/feedback/submit', {
+      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/feedback/submit`, {
         orderId: selectedOrderForFeedback.orderId,
         rating: feedbackData.rating,
         feedbackType: feedbackData.feedbackType,

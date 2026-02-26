@@ -23,7 +23,7 @@ const ArchivedProducts = () => {
 
   const fetchArchivedProducts = async () => {
     try {
-      const response = await axios.get('http://localhost:4000/api/products/archived/all');
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/products/archived/all`);
       setArchivedProducts(response.data.data || []);
       setLoading(false);
     } catch (error) {
@@ -50,7 +50,7 @@ const ArchivedProducts = () => {
     }
     
     try {
-      await axios.patch(`http://localhost:4000/api/products/${productId}/unarchive`);
+      await axios.patch(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/products/${productId}/unarchive`);
       await fetchArchivedProducts();
       await Swal.fire({
         title: 'Restored!',
@@ -90,7 +90,7 @@ const ArchivedProducts = () => {
     }
     
     try {
-      await axios.delete(`http://localhost:4000/api/products/${productId}`);
+      await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/products/${productId}`);
       await fetchArchivedProducts();
       await Swal.fire({
         title: 'Deleted!',

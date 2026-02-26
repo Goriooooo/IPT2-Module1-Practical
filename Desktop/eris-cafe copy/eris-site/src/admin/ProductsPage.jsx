@@ -48,7 +48,7 @@ const ProductsPage = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('http://localhost:4000/api/products');
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/products`);
       setProducts(response.data.data || []);
       setLoading(false);
     } catch (error) {
@@ -170,7 +170,7 @@ const ProductsPage = () => {
 
     try {
       const response = await axios.post(
-        'http://localhost:4000/api/upload/image',
+        `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/upload/image`,
         uploadFormData,
         {
           headers: {
@@ -207,7 +207,7 @@ const ProductsPage = () => {
       if (editingProduct) {
         // Update existing product
         const response = await axios.put(
-          `http://localhost:4000/api/products/${editingProduct._id}`,
+          `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/products/${editingProduct._id}`,
           productData
         );
         setProducts(products.map(p => 
@@ -223,7 +223,7 @@ const ProductsPage = () => {
       } else {
         // Create new product
         const response = await axios.post(
-          'http://localhost:4000/api/products',
+          `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/products`,
           productData
         );
         setProducts([response.data.data, ...products]);
@@ -267,7 +267,7 @@ const ProductsPage = () => {
     }
     
     try {
-      await axios.patch(`http://localhost:4000/api/products/${productId}/archive`);
+      await axios.patch(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/products/${productId}/archive`);
       await fetchProducts();
       await Swal.fire({
         title: 'Archived!',

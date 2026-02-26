@@ -168,7 +168,7 @@ const Checkout = () => {
       console.log('Sending order data:', JSON.stringify(orderData, null, 2));
 
       const response = await axios.post(
-        'http://localhost:4000/api/orders/create',
+        `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/orders/create`,
         orderData,
         {
           headers: {

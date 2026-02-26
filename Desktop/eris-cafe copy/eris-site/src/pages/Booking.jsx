@@ -32,7 +32,7 @@ const Booking = () => {
         return;
       }
 
-      const response = await axios.get('http://localhost:4000/api/reservations/my-reservations', {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/reservations/my-reservations`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -73,7 +73,7 @@ const Booking = () => {
       const token = localStorage.getItem('appToken');
       
       const response = await axios.delete(
-        `http://localhost:4000/api/reservations/${reservationId}`,
+        `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/reservations/${reservationId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`

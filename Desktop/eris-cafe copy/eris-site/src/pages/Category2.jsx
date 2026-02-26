@@ -25,9 +25,9 @@ const Category2 = () => {
       setLoading(true);
       setError('');
       
-      console.log('Fetching products from: http://localhost:4000/api/products');
+      console.log('Fetching products from:', `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/products`);
       
-      const response = await axios.get('http://localhost:4000/api/products');
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/products`);
       
       console.log('Response:', response.data);
       

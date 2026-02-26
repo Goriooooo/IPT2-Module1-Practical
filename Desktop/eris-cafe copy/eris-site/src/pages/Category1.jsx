@@ -27,7 +27,7 @@ const Category1 = () => {
       console.log('Fetching products from API');
       
       // Temporarily fetch ALL products to debug
-      const response = await axios.get('http://localhost:4000/api/products');
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/products`);
       
       console.log('Response:', response.data);
       

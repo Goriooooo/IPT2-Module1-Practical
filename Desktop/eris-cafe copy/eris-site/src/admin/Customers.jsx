@@ -29,7 +29,7 @@ export default function Customers() {
         }
       };
 
-      const response = await axios.get('http://localhost:4000/api/users/customers', config);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/users/customers`, config);
       setCustomers(response.data.data || []);
       setLoading(false);
     } catch (error) {
@@ -48,7 +48,7 @@ export default function Customers() {
         }
       };
 
-      const response = await axios.get(`http://localhost:4000/api/users/customers/${customerId}`, config);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/users/customers/${customerId}`, config);
       setCustomerDetails(response.data.data);
       setDetailsLoading(false);
     } catch (error) {

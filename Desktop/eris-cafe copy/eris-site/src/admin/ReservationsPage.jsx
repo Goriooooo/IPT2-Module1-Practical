@@ -191,7 +191,7 @@ const ReservationsPage = () => {
         };
 
         await axios.patch(
-          `http://localhost:4000/api/reservations/${reservation._id}/calendar-event`,
+          `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/reservations/${reservation._id}/calendar-event`,
           { googleCalendarEventId: result.eventId },
           config
         );
@@ -265,7 +265,7 @@ const ReservationsPage = () => {
         }
       };
 
-      const response = await axios.get('http://localhost:4000/api/reservations/admin/all', config);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/reservations/admin/all`, config);
       setReservations(response.data.data || []);
       setLoading(false);
     } catch (error) {
@@ -357,7 +357,7 @@ const ReservationsPage = () => {
       };
 
       await axios.patch(
-        `http://localhost:4000/api/reservations/${reservationId}/status`,
+        `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/reservations/${reservationId}/status`,
         { status: newStatus },
         config
       );

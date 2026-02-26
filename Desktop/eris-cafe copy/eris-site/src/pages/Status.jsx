@@ -24,7 +24,7 @@ export default function Status() {
       setLoading(true);
       const token = localStorage.getItem('appToken');
       const response = await axios.get(
-        `http://localhost:4000/api/orders/my-orders`,
+        `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/orders/my-orders`,
         {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -87,7 +87,7 @@ export default function Status() {
       try {
         const token = localStorage.getItem('appToken');
         const response = await axios.post(
-          `http://localhost:4000/api/orders/${orderData._id}/cancel-request`, 
+          `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/orders/${orderData._id}/cancel-request`, 
           {},
           {
             headers: {

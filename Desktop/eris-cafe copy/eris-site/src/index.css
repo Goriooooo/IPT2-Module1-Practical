@@ -2,6 +2,24 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
+/* Fix SweetAlert2 button visibility - Tailwind preflight strips button colors */
+.swal2-confirm,
+.swal2-cancel,
+.swal2-deny {
+  color: #fff !important;
+}
+
+.swal2-confirm:focus,
+.swal2-cancel:focus,
+.swal2-deny:focus {
+  box-shadow: none !important;
+}
+
+/* Ensure SweetAlert2 popup is above everything */
+.swal2-container {
+  z-index: 99999 !important;
+}
+
 /* Glassmorphism Utility Classes for Admin UI */
 .glass {
   background: rgba(255, 255, 255, 0.25);

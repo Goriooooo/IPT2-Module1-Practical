@@ -465,6 +465,14 @@ router.put('/users/:userId/role', async (req, res) => {
       });
     }
 
+    // Prevent admin from demoting themselves
+    if (userId === req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: 'You cannot change your own role. Another admin must do this.'
+      });
+    }
+
     // Verify admin password
     const admin = await User.findById(req.user.id);
     if (!admin || !admin.password) {

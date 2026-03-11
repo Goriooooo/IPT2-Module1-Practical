@@ -35,6 +35,10 @@ import ReservationsAnalytics from './admin/ReservationsAnalytics'
 import ProductAnalytics from './admin/ProductAnalytics'
 import ArchivedProducts from './admin/ArchivedProducts'
 import Status from "./pages/Status"
+import Shop from "./pages/Shop"
+import Terms from "./pages/Terms"
+import Privacy from "./pages/Privacy"
+import NotFound from "./pages/NotFound"
 import ProtectedRoute from './components/ProtectedRoute'
 import { AnimatePresence } from 'framer-motion'
 
@@ -51,6 +55,7 @@ const AnimatedRoutes = () => {
         <Route path="/admin/login" element={<Login />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/shop" element={<Shop />} />
         <Route path="/booking" element={<Booking />} />
         <Route path="/category1" element={<First />} />
         <Route path="/category2" element={<Category2 />} />
@@ -63,6 +68,8 @@ const AnimatedRoutes = () => {
         <Route path="/orders" element={<Orders />} />
         <Route path="/account" element={<MyAccount />} />
         <Route path="/status" element={<Status />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         {/* Admin Routes - Protected */}
         <Route path="/admin" element={
@@ -87,7 +94,7 @@ const AnimatedRoutes = () => {
           <Route path="analytics/reservations" element={<ReservationsAnalytics />} />
         </Route>
         
-        <Route path="*" element={<Home />} /> 
+        <Route path="*" element={<NotFound />} /> 
       </Routes>
     </AnimatePresence>
   )

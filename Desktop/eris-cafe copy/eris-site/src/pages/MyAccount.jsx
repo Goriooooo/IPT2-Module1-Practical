@@ -156,14 +156,28 @@ const MyAccount = () => {
       return;
     }
 
-    if (!formData.phone) {
-      await Swal.fire({
-        title: 'Validation Error',
-        text: 'Phone number is required',
-        icon: 'error',
-        confirmButtonColor: '#78350f'
-      });
-      return;
+    // Validate phone format if provided (phone is optional)
+    if (formData.phone && formData.phone.trim() !== '') {
+      const phoneRegex = /^[+]?[\d\s()-]{7,15}$/;
+      const digitsOnly = formData.phone.replace(/\D/g, '');
+      if (!phoneRegex.test(formData.phone.trim())) {
+        await Swal.fire({
+          title: 'Invalid Phone Format',
+          text: 'Please enter a valid phone number (e.g., +63 912 345 6789) or leave it empty.',
+          icon: 'error',
+          confirmButtonColor: '#78350f'
+        });
+        return;
+      }
+      if (digitsOnly.length < 10) {
+        await Swal.fire({
+          title: 'Phone Number Too Short',
+          text: 'Phone number must have at least 10 digits.',
+          icon: 'error',
+          confirmButtonColor: '#78350f'
+        });
+        return;
+      }
     }
 
     setLoading(true);
@@ -491,7 +505,7 @@ const MyAccount = () => {
                     <div>
                       <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
                         <Phone size={16} />
-                        Phone Number <span className="text-red-600">*</span>
+                        Phone Number
                       </label>
                       <input
                         type="tel"
@@ -499,7 +513,6 @@ const MyAccount = () => {
                         value={formData.phone}
                         onChange={handleChange}
                         disabled={!isEditing}
-                        required
                         placeholder="+63 XXX XXX XXXX"
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                       />

@@ -1,15 +1,22 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { Icon } from '@iconify/react';
+import { useAuth } from '../context/AuthContext';
+import UserProfile from './UserProfile';
 
 function Navigation() {
   const location = useLocation()
+  const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { isAuthenticated } = useAuth()
 
   const navItems = [
+    { name: 'Home', path: '/home' },
+    { name: 'Shop', path: '/shop' },
     { name: 'Cart', path: '/cart' },
-    { name: 'Shop', path: '/category1' },
-    { name: 'Tables', path: '/reservation' }
+    { name: 'Tables', path: '/reservation' },
+    { name: 'About', path: '/about' },
+    { name: 'Contact', path: '/contact' },
   ]
 
   const isActive = (path) => {
@@ -20,15 +27,15 @@ function Navigation() {
     <nav className="bg-[#EDEDE6] shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
         <div className="flex justify-between items-center h-[90px]">
-          {/* Logo */}
-          <Link to="/mealpage" className="flex items-center space-x-2">
+          {/* Back button */}
+          <button onClick={() => navigate(-1)} className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-transparent rounded-full border border-black flex items-center justify-center">
               <span className="text-white font-bold text-lg"><Icon icon="material-symbols:arrow-back" width="24" height="24" style={{color: "#000"}} /></span>
             </div>
-          </Link>
+          </button>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex space-x-8">
+          <div className="hidden md:flex items-center space-x-6">
             {navItems.map((item) => (
               <Link
                 key={item.name}
@@ -42,6 +49,20 @@ function Navigation() {
                 {item.name}
               </Link>
             ))}
+          </div>
+
+          {/* Profile / Sign In */}
+          <div className="hidden md:flex items-center">
+            {isAuthenticated ? (
+              <UserProfile />
+            ) : (
+              <button
+                onClick={() => navigate('/login')}
+                className="px-4 py-2 bg-amber-900 text-white font-medium rounded-lg hover:bg-amber-800 transition-all"
+              >
+                Sign In
+              </button>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -79,6 +100,18 @@ function Navigation() {
                   {item.name}
                 </Link>
               ))}
+              <div className="pt-2 border-t border-gray-200">
+                {isAuthenticated ? (
+                  <UserProfile />
+                ) : (
+                  <button
+                    onClick={() => { navigate('/login'); setIsMenuOpen(false); }}
+                    className="w-full px-3 py-2 bg-amber-900 text-white font-medium rounded-lg hover:bg-amber-800 transition-all"
+                  >
+                    Sign In
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         )}

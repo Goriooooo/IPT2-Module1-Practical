@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import Swal from 'sweetalert2';
 
 // 1. Create the AuthContext
 const AuthContext = createContext();
@@ -124,6 +125,14 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('appToken');
     delete api.defaults.headers.common['Authorization'];
     console.log('Logout successful');
+    Swal.fire({
+      title: 'Logged Out',
+      text: 'You have been successfully logged out.',
+      icon: 'success',
+      confirmButtonColor: '#78350f',
+      timer: 2000,
+      showConfirmButton: false
+    });
   };
 
   // Refresh user data from server

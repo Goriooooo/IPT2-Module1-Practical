@@ -325,6 +325,17 @@ const LoginMonitoring = () => {
   };
 
   const handleUpdateRole = async (userId, currentRole, userName) => {
+    // Prevent self-demotion
+    if (userId === userData?.id || userId === userData?._id) {
+      await Swal.fire({
+        title: 'Not Allowed',
+        text: 'You cannot change your own role. Another admin must do this.',
+        icon: 'error',
+        confirmButtonColor: '#8B5CF6'
+      });
+      return;
+    }
+    
     const result = await Swal.fire({
       title: `Update Role for ${userName}`,
       width: '500px',

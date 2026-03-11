@@ -237,7 +237,7 @@ export default function CartPage() {
             </svg>
             <p className="text-xl text-gray-600 mb-4">Your cart is empty</p>
             <button
-              onClick={() => navigate('/hotespresso')}
+              onClick={() => navigate('/shop')}
               className="bg-amber-900 hover:bg-amber-800 text-white px-6 py-2 rounded transition"
             >
               Start Shopping
@@ -337,11 +337,20 @@ export default function CartPage() {
                     </div>
                   </div>
 
-                  {/* Price */}
-                  <div className="flex-shrink-0 min-w-[60px] sm:min-w-[80px] text-right">
+                  {/* Price and Delete */}
+                  <div className="flex-shrink-0 min-w-[60px] sm:min-w-[80px] text-right flex flex-col items-end gap-2">
                     <p className="text-lg sm:text-xl md:text-2xl font-light">
                       {typeof item.price === 'string' ? item.price : `₱${item.price}`}
                     </p>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleDelete(item); }}
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded transition"
+                      title="Remove item"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
               </div>

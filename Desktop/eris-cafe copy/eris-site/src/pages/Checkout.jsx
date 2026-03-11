@@ -57,7 +57,7 @@ const Checkout = () => {
     if (!isAuthenticated) {
       console.log('FAILED: Not authenticated');
       setError('Please login to proceed with checkout');
-      setTimeout(() => navigate('/'), 2000);
+      setTimeout(() => navigate('/login'), 2000);
       return false;
     }
 
@@ -72,7 +72,7 @@ const Checkout = () => {
     if (!cartItems || cartItems.length === 0) {
       console.log('FAILED: Cart is empty');
       setError('Your cart is empty. Please add items before placing an order.');
-      setTimeout(() => navigate('/'), 2000);
+      setTimeout(() => navigate('/shop'), 2000);
       return false;
     }
 

@@ -151,10 +151,13 @@ const Home = () => {
           <nav className="flex justify-between items-center">
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
+              <RouterLink to="/shop" className="hover:text-amber-400 transition-colors font-large text-white">
+                SHOP
+              </RouterLink>
               <RouterLink to="/about" className="hover:text-amber-400 transition-colors font-large text-white">
                 ABOUT US
               </RouterLink>
-              <RouterLink to="/about" className="hover:text-amber-400 transition-colors font-large text-white">
+              <RouterLink to="/contact" className="hover:text-amber-400 transition-colors font-large text-white">
                 CONTACT
               </RouterLink>
             </div>
@@ -196,8 +199,15 @@ const Home = () => {
             <div className="md:hidden mt-4 pb-4 border-t border-white/10 pt-4">
               <div className="space-y-4">
                 <RouterLink 
-                  to="/cart" 
+                  to="/shop" 
                   className="block text-amber-400 font-medium"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  SHOP
+                </RouterLink>
+                <RouterLink 
+                  to="/cart" 
+                  className="block hover:text-amber-400 transition-colors font-medium text-white"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   CART
@@ -208,6 +218,13 @@ const Home = () => {
                   onClick={() => setIsMenuOpen(false)}
                 >
                   ABOUT US
+                </RouterLink>
+                <RouterLink 
+                  to="/contact" 
+                  className="block hover:text-amber-400 transition-colors font-medium text-white"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  CONTACT
                 </RouterLink>
                 <div className="pt-4 border-t border-white/10">
                   {isAuthenticated ? (
@@ -275,12 +292,30 @@ const Home = () => {
               <p className="text-lg sm:text-xl md:text-2xl text-gray-200 leading-relaxed drop-shadow-lg max-w-3xl mt-6 font-light">
                 Your Daily Dose of Caffeine and Comfort.
               </p>
+              
+              <div className="mt-8 flex gap-4 justify-center">
+                <RouterLink 
+                  to="/shop" 
+                  className="px-8 py-3 bg-gradient-to-r from-amber-600 to-amber-800 text-white font-semibold rounded-lg hover:from-amber-700 hover:to-amber-900 transition-all shadow-lg text-lg"
+                >
+                  Shop Now
+                </RouterLink>
+                <RouterLink 
+                  to="/reservation" 
+                  className="px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white/10 transition-all shadow-lg text-lg"
+                >
+                  Reserve a Seat
+                </RouterLink>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Scroll Indicator */}
-        <div className="absolute z-50 top-[85vh] left-1/2 transform -translate-x-1/2 animate-bounce">
+        {/* Scroll Indicator - only visible near top */}
+        <div 
+          className="absolute z-50 top-[85vh] left-1/2 transform -translate-x-1/2 animate-bounce transition-opacity duration-300"
+          style={{ opacity: scrollY < 100 ? 1 : 0, pointerEvents: scrollY < 100 ? 'auto' : 'none' }}
+        >
           <div className="w-6 h-10 border-2 border-white rounded-full flex justify-center">
             <div className="w-1 h-3 bg-white rounded-full mt-2 animate-pulse"></div>
           </div>
@@ -526,13 +561,12 @@ const Home = () => {
       <div className="text-start text-white m5 py-6 mt-8 sm:mt-16 ml-4 sm:ml-10 px-4">
         <h1 className='text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light'>
           Connect with us</h1>
-        <h1 className='text-xl sm:text-2xl md:text-3xl py-3 sm:py-5 font-thin flex' >
-          <img src={fb} alt="" className="w-10 h-10 mr-2" />
-          Buksu Eris Coffee</h1>
-        <h1 className='text-xl sm:text-2xl md:text-3xl py-3 sm:py-5 font-thin flex' >
-          <img src={ig} alt="" className="w-10 h-10 mr-2" />
-          
-          @Eris_Coffee</h1>
+        <a href="https://www.facebook.com/BuksuErisCoffee" target="_blank" rel="noopener noreferrer" className='text-xl sm:text-2xl md:text-3xl py-3 sm:py-5 font-thin flex hover:text-amber-400 transition-colors'>
+          <img src={fb} alt="Facebook" className="w-10 h-10 mr-2" />
+          Buksu Eris Coffee</a>
+        <a href="https://www.instagram.com/Eris_Coffee" target="_blank" rel="noopener noreferrer" className='text-xl sm:text-2xl md:text-3xl py-3 sm:py-5 font-thin flex hover:text-amber-400 transition-colors'>
+          <img src={ig} alt="Instagram" className="w-10 h-10 mr-2" />
+          @Eris_Coffee</a>
       </div>
       <div className="text-center text-white py-4 px-4">
         <h1 className='text-sm sm:text-base'>© 2025 Eris Cafe</h1>

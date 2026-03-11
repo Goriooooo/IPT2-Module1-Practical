@@ -54,6 +54,11 @@ const ReservationsPage = () => {
     fetchReservations();
     initializeGoogleCalendar();
     
+    // Auto-refresh reservations every 30 seconds to show new ones
+    const refreshInterval = setInterval(() => {
+      fetchReservations();
+    }, 30000);
+    
     // Check for stored token every 5 seconds to update UI
     const intervalId = setInterval(() => {
       if (googleCalendarInitialized) {
@@ -65,7 +70,10 @@ const ReservationsPage = () => {
       }
     }, 5000);
     
-    return () => clearInterval(intervalId);
+    return () => {
+      clearInterval(intervalId);
+      clearInterval(refreshInterval);
+    };
   }, [googleCalendarInitialized, googleSignedIn]);
 
   // Initialize Google Calendar API
@@ -266,7 +274,44 @@ const ReservationsPage = () => {
       };
 
       const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/reservations/admin/all`, config);
-      setReservations(response.data.data || []);
+      const allReservations = response.data.data || [];
+      
+      // Auto-update past reservations to 'no-show'
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      
+      const noShowPromises = allReservations
+        .filter(res => {
+          if (res.status !== 'confirmed' && res.status !== 'pending') return false;
+          const resDate = new Date(res.date);
+          const resDateOnly = new Date(resDate.getFullYear(), resDate.getMonth(), resDate.getDate());
+          // If reservation date is before today, mark as no-show
+          if (resDateOnly < today) return true;
+          // If reservation is today but time has passed (with 2 hour buffer)
+          if (resDateOnly.getTime() === today.getTime() && res.time) {
+            const [hours, minutes] = res.time.split(':').map(Number);
+            const resDateTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours + 2, minutes);
+            return resDateTime < now;
+          }
+          return false;
+        })
+        .map(res => 
+          axios.patch(
+            `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/reservations/${res._id}/status`,
+            { status: 'no-show' },
+            config
+          ).catch(err => console.error('Failed to auto-update no-show:', err))
+        );
+      
+      if (noShowPromises.length > 0) {
+        await Promise.all(noShowPromises);
+        // Re-fetch to get updated data
+        const updatedResponse = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/reservations/admin/all`, config);
+        setReservations(updatedResponse.data.data || []);
+      } else {
+        setReservations(allReservations);
+      }
+      
       setLoading(false);
     } catch (error) {
       console.error('Error fetching reservations:', error);
@@ -921,6 +966,37 @@ const ReservationsPage = () => {
                       <div className="flex gap-2">
                         <button
                           onClick={async () => {
+                            // Check if reservation date is in the past
+                            const resDate = new Date(selectedReservation.date);
+                            const resDateOnly = new Date(resDate.getFullYear(), resDate.getMonth(), resDate.getDate());
+                            const today = new Date();
+                            const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                            
+                            if (resDateOnly < todayOnly) {
+                              await Swal.fire({
+                                title: 'Cannot Confirm',
+                                text: 'This reservation is for a past date and cannot be confirmed.',
+                                icon: 'error',
+                                confirmButtonColor: '#8B5CF6'
+                              });
+                              return;
+                            }
+                            
+                            // If today, check if time has passed
+                            if (resDateOnly.getTime() === todayOnly.getTime() && selectedReservation.time) {
+                              const [hours, minutes] = selectedReservation.time.split(':').map(Number);
+                              const resDateTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), hours, minutes);
+                              if (resDateTime < today) {
+                                await Swal.fire({
+                                  title: 'Cannot Confirm',
+                                  text: 'This reservation time has already passed.',
+                                  icon: 'error',
+                                  confirmButtonColor: '#8B5CF6'
+                                });
+                                return;
+                              }
+                            }
+                            
                             // Check for conflicting reservations
                             const conflicts = reservations.filter(res => {
                               if (res._id === selectedReservation._id) return false; // Skip self
